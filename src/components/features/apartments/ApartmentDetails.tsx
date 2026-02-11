@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { Apartment, UserPreferences, CustomChecklistTemplate } from '../../../types';
 import { useAuth } from '../../../context/AuthContext';
@@ -268,7 +268,7 @@ export function ApartmentDetails() {
 
     // Summary Generator
     const generateSummary = () => {
-        const positiveFields = [];
+        const positiveFields: string[] = [];
         const booleanFields: { key: keyof Apartment, label: string }[] = [
             { key: 'elevator', label: HE.apartment.elevator },
             { key: 'parking', label: 'חניה' },

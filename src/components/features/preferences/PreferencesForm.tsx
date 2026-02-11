@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+
 import { useAuth } from '../../../context/AuthContext';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { UserPreferences } from '../../../types';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { HE } from '../../../lib/i18n';
 import { Input } from '../../common/Input';
-import { Save, Check, Trash2 } from 'lucide-react';
+import { Save, Trash2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CustomChecklistTemplate } from '../../../types';
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { db } from '../../../lib/firebase';
-import { collection, doc, setDoc, updateDoc, arrayUnion, query, where, getDocs, serverTimestamp, onSnapshot, getDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, arrayUnion, query, where, getDocs, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { Group } from '../../../types';
 import { HE } from '../../../lib/i18n';
 import toast from 'react-hot-toast';
