@@ -4,7 +4,7 @@ import { db } from '../../../lib/firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { Apartment } from '../../../types';
 import { ApartmentCard } from './ApartmentCard';
-import { HE } from '../../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardStats } from './DashboardStats'; // Assuming this exists or will be created
@@ -12,6 +12,7 @@ import { EmptyState } from './EmptyState'; // Assuming this exists or will be cr
 
 export function ApartmentList() {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [loading, setLoading] = useState(true);
     const [userGroupId, setUserGroupId] = useState<string | null>(null);
@@ -110,7 +111,7 @@ export function ApartmentList() {
             {unrejectedApartments.length === 0 ? (
                 <EmptyState />
             ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {unrejectedApartments.map(apartment => (
                         <ApartmentCard key={apartment.id} apartment={apartment} />
                     ))}
@@ -121,7 +122,7 @@ export function ApartmentList() {
             <Link
                 to="/add"
                 className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50 flex items-center justify-center"
-                aria-label={HE.common.add}
+                aria-label={t('common.add')}
             >
                 <Plus size={24} />
             </Link>

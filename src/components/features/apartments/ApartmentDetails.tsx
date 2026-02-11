@@ -4,7 +4,7 @@ import { doc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../../lib/firebase';
 import { Apartment, UserPreferences, CustomChecklistTemplate } from '../../../types';
 import { useAuth } from '../../../context/AuthContext';
-import { HE } from '../../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { Edit, Phone, MapPin, ExternalLink, Check, Eye, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, MessageSquare, Trash2, FileSignature, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
@@ -13,6 +13,7 @@ export function ApartmentDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [apartment, setApartment] = useState<Apartment | null>(null);
     const [preferences, setPreferences] = useState<UserPreferences | null>(null);
     const [loading, setLoading] = useState(true);
@@ -35,7 +36,7 @@ export function ApartmentDetails() {
         const timeoutId = setTimeout(() => {
             if (isMounted.current && loading) {
                 setLoading(false);
-                toast.error('הטעינה נמשכת זמן רב מדי, נסה לרענן');
+                toast.error(t('apartment.loadingLong'));
             }
         }, 10000);
 
@@ -45,14 +46,14 @@ export function ApartmentDetails() {
                     setApartment({ id: docSnap.id, ...docSnap.data() } as Apartment);
                     setLoading(false);
                 } else {
-                    toast.error('הדירה לא נמצאה');
+                    toast.error(t('apartment.notFound'));
                     navigate('/');
                 }
             }
         }, (error) => {
             console.error("Error fetching apartment:", error);
             if (isMounted.current) {
-                toast.error(HE.common.error);
+                toast.error(t('common.error'));
                 setLoading(false);
             }
         });
@@ -78,7 +79,7 @@ export function ApartmentDetails() {
             unsubApartment();
             unsubUser();
         };
-    }, [id, navigate, user]);
+    }, [id, navigate, user, t]);
 
     const toggleField = async (field: keyof Apartment) => {
         if (!apartment || !id) return;
@@ -88,7 +89,7 @@ export function ApartmentDetails() {
             await updateDoc(doc(db, 'apartments', id), { [field]: newValue });
         } catch (error) {
             console.error(error);
-            toast.error(HE.common.error);
+            toast.error(t('common.error'));
         }
     };
 
@@ -105,18 +106,12 @@ export function ApartmentDetails() {
             await updateDoc(doc(db, 'apartments', id), { customChecks: updatedChecks });
         } catch (error) {
             console.error(error);
-            toast.error(HE.common.error);
+            toast.error(t('common.error'));
         }
     };
 
-    // ... (saveNote unchanged)
-
-    // ... (getMissingRequirements unchanged)
-
-    // ... (renderBooleanItem unchanged)
-
     const handleDelete = async () => {
-        if (!confirm(HE.common.confirmDelete)) return;
+        if (!confirm(t('common.confirmDelete'))) return;
         if (!apartment || !id) return;
 
         try {
@@ -124,11 +119,11 @@ export function ApartmentDetails() {
                 deleted: true,
                 deletedAt: serverTimestamp()
             });
-            toast.success(HE.common.deleteSuccess);
+            toast.success(t('common.deleteSuccess'));
             navigate('/');
         } catch (error) {
             console.error(error);
-            toast.error(HE.common.error);
+            toast.error(t('common.error'));
         }
     };
 
@@ -172,30 +167,28 @@ export function ApartmentDetails() {
             setNoteText('');
         } catch (error) {
             console.error(error);
-            toast.error('שגיאה בשמירת הערה');
-            // Re-open if failed? Maybe just alert.
+            toast.error(t('apartment.saveNoteError'));
         }
     };
 
-    // Matches logic...
     const getMissingRequirements = () => {
         if (!preferences || !apartment) return [];
         const missing: string[] = [];
 
-        if (preferences.mustHaveElevator && !apartment.elevator) missing.push(HE.apartment.elevator);
-        if (preferences.mustHaveParking && !apartment.parking) missing.push(HE.apartment.parking);
-        if (preferences.mustHaveBalcony && !apartment.balcony) missing.push(HE.apartment.balcony);
-        if (preferences.mustHaveAC && !apartment.ac) missing.push(HE.apartment.ac);
-        if (preferences.mustHaveMamad && !apartment.tama38 && !apartment.notes?.includes('ממ"ד')) missing.push('ממ״ד');
-        if (preferences.mustHavePets && !apartment.pets) missing.push(HE.apartment.pets);
+        if (preferences.mustHaveElevator && !apartment.elevator) missing.push(t('apartment.elevator'));
+        if (preferences.mustHaveParking && !apartment.parking) missing.push(t('apartment.parking'));
+        if (preferences.mustHaveBalcony && !apartment.balcony) missing.push(t('apartment.balcony'));
+        if (preferences.mustHaveAC && !apartment.ac) missing.push(t('apartment.ac'));
+        if (preferences.mustHaveMamad && !apartment.tama38 && !apartment.notes?.includes('ממ"ד')) missing.push('ממ״ד'); // Kept hardcoded as it checks specific text
+        if (preferences.mustHavePets && !apartment.pets) missing.push(t('apartment.pets'));
 
-        if (preferences.maxPrice && apartment.price > preferences.maxPrice) missing.push(`${HE.settings.maxPrice} (${preferences.maxPrice} ₪)`);
-        if (preferences.minRooms && (apartment.rooms || 0) < preferences.minRooms) missing.push(`${HE.settings.minRooms} (${preferences.minRooms})`);
+        if (preferences.maxPrice && apartment.price > preferences.maxPrice) missing.push(`${t('settings.maxPrice')} (${preferences.maxPrice} ₪)`);
+        if (preferences.minRooms && (apartment.rooms || 0) < preferences.minRooms) missing.push(`${t('settings.minRooms')} (${preferences.minRooms})`);
 
         return missing;
     };
 
-    if (loading) return <div className="p-8 text-center">{HE.common.loading}</div>;
+    if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
     if (!apartment) return null;
 
     const missingReqs = getMissingRequirements();
@@ -251,14 +244,14 @@ export function ApartmentDetails() {
                             value={noteText}
                             onChange={(e) => setNoteText(e.target.value)}
                             className="flex-1 border rounded px-2 py-1 text-sm"
-                            placeholder="הוסף הערה..."
+                            placeholder={t('apartment.addNotePlaceholder')}
                             autoFocus
                         />
                         <button
                             onClick={() => saveNote(field)}
                             className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold"
                         >
-                            שמור
+                            {t('common.save')}
                         </button>
                     </div>
                 )}
@@ -270,16 +263,16 @@ export function ApartmentDetails() {
     const generateSummary = () => {
         const positiveFields: string[] = [];
         const booleanFields: { key: keyof Apartment, label: string }[] = [
-            { key: 'elevator', label: HE.apartment.elevator },
-            { key: 'parking', label: 'חניה' },
-            { key: 'balcony', label: 'מרפסת' },
-            { key: 'pets', label: HE.apartment.pets },
-            { key: 'furnished', label: HE.apartment.furnished },
-            { key: 'tama38', label: HE.apartment.tama38 },
-            { key: 'ac', label: 'מזגן' },
-            { key: 'bars', label: 'סורגים' },
-            { key: 'doubleGlazed', label: 'חלונות כפולים' },
-            { key: 'naturalLight', label: 'אור טבעי' },
+            { key: 'elevator', label: t('apartment.elevator') },
+            { key: 'parking', label: t('apartment.parking') },
+            { key: 'balcony', label: t('apartment.balcony') },
+            { key: 'pets', label: t('apartment.pets') },
+            { key: 'furnished', label: t('apartment.furnished') },
+            { key: 'tama38', label: t('apartment.tama38') },
+            { key: 'ac', label: t('apartment.ac') },
+            { key: 'bars', label: t('apartment.bars') },
+            { key: 'doubleGlazed', label: t('apartment.doubleGlazed') },
+            { key: 'naturalLight', label: t('apartment.naturalLight') },
         ];
 
         booleanFields.forEach(({ key, label }) => {
@@ -292,9 +285,6 @@ export function ApartmentDetails() {
         return positiveFields;
     };
 
-    // ... existing imports
-
-    // New internal component or just inline JSX for the modal
     const QuickEditRequirements = ({ onClose }: { onClose: () => void }) => {
         const [tempPrefs, setTempPrefs] = useState<UserPreferences>(preferences || {});
 
@@ -306,11 +296,11 @@ export function ApartmentDetails() {
             if (!user) return;
             try {
                 await updateDoc(doc(db, 'users', user.uid), { preferences: tempPrefs });
-                toast.success('הדרישות עודכנו');
+                toast.success(t('settings.saveSuccess'));
                 onClose();
             } catch (error) {
                 console.error(error);
-                toast.error(HE.common.error);
+                toast.error(t('common.error'));
             }
         };
 
@@ -318,28 +308,28 @@ export function ApartmentDetails() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
                 <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
                     <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-                        <h3 className="font-bold text-lg">עריכת דרישות חובה</h3>
+                        <h3 className="font-bold text-lg">{t('settings.editMustHaves') || 'עריכת דרישות חובה'}</h3>
                         <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full">
                             <X size={20} />
                         </button>
                     </div>
                     <div className="p-4 space-y-3">
                         <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-                            <span className="font-medium text-gray-700">{HE.apartment.elevator}</span>
+                            <span className="font-medium text-gray-700">{t('apartment.elevator')}</span>
                             <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveElevator ? "bg-blue-600" : "bg-gray-200")}>
                                 <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveElevator ? "translate-x-[-1.25rem]" : "translate-x-0")} />
                             </div>
                             <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveElevator || false} onChange={() => toggle('mustHaveElevator')} />
                         </label>
                         <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-                            <span className="font-medium text-gray-700">חניה</span>
+                            <span className="font-medium text-gray-700">{t('apartment.parking')}</span>
                             <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveParking ? "bg-blue-600" : "bg-gray-200")}>
                                 <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveParking ? "translate-x-[-1.25rem]" : "translate-x-0")} />
                             </div>
                             <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveParking || false} onChange={() => toggle('mustHaveParking')} />
                         </label>
                         <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-                            <span className="font-medium text-gray-700">מרפסת</span>
+                            <span className="font-medium text-gray-700">{t('apartment.balcony')}</span>
                             <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveBalcony ? "bg-blue-600" : "bg-gray-200")}>
                                 <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveBalcony ? "translate-x-[-1.25rem]" : "translate-x-0")} />
                             </div>
@@ -353,14 +343,14 @@ export function ApartmentDetails() {
                             <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveMamad || false} onChange={() => toggle('mustHaveMamad')} />
                         </label>
                         <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-                            <span className="font-medium text-gray-700">מזגן</span>
+                            <span className="font-medium text-gray-700">{t('apartment.ac')}</span>
                             <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveAC ? "bg-blue-600" : "bg-gray-200")}>
                                 <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveAC ? "translate-x-[-1.25rem]" : "translate-x-0")} />
                             </div>
                             <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveAC || false} onChange={() => toggle('mustHaveAC')} />
                         </label>
                         <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-                            <span className="font-medium text-gray-700">{HE.apartment.pets}</span>
+                            <span className="font-medium text-gray-700">{t('apartment.pets')}</span>
                             <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHavePets ? "bg-blue-600" : "bg-gray-200")}>
                                 <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHavePets ? "translate-x-[-1.25rem]" : "translate-x-0")} />
                             </div>
@@ -369,7 +359,7 @@ export function ApartmentDetails() {
                     </div>
                     <div className="p-4 border-t bg-gray-50">
                         <button onClick={save} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">
-                            שמור שינויים
+                            {t('common.saveChanges')}
                         </button>
                     </div>
                 </div>
@@ -398,7 +388,7 @@ export function ApartmentDetails() {
                 {/* Last Update Info */}
                 {apartment.lastUpdatedByName && (
                     <div className="text-xs text-gray-400 mb-4 flex items-center gap-1">
-                        <span>עודכן לאחרונה ע"י {apartment.lastUpdatedByName}</span>
+                        <span>{t('apartment.lastUpdatedBy')} {apartment.lastUpdatedByName}</span>
                         {apartment.updatedAt?.seconds && (
                             <span>• {new Date(apartment.updatedAt.seconds * 1000).toLocaleDateString('he-IL')}</span>
                         )}
@@ -411,22 +401,22 @@ export function ApartmentDetails() {
                         onClick={() => setIsSummaryOpen(!isSummaryOpen)}
                         className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
                     >
-                        <span className="font-bold text-gray-700 text-sm">סיכום מהירה</span>
+                        <span className="font-bold text-gray-700 text-sm">{t('apartment.quickSummary')}</span>
                         {isSummaryOpen ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
                     </button>
                     {isSummaryOpen && (
                         <div className="p-4 bg-white text-sm text-gray-700">
-                            <h4 className="font-bold mb-2">יש בדירה:</h4>
+                            <h4 className="font-bold mb-2">{t('apartment.contains')}</h4>
                             <ul className="list-disc list-inside space-y-1 mb-4">
                                 {generateSummary().map((item, idx) => (
                                     <li key={idx}>{item}</li>
                                 ))}
-                                {generateSummary().length === 0 && <li>עדיין לא סומנו פרטים</li>}
+                                {generateSummary().length === 0 && <li>{t('apartment.noDetails')}</li>}
                             </ul>
 
                             {apartment.notes && (
                                 <>
-                                    <h4 className="font-bold mb-1">הערות כלליות:</h4>
+                                    <h4 className="font-bold mb-1">{t('apartment.generalNotes')}</h4>
                                     <p className="whitespace-pre-wrap">{apartment.notes}</p>
                                 </>
                             )}
@@ -447,7 +437,7 @@ export function ApartmentDetails() {
                         )}
                         <div className="flex-1 min-w-0">
                             <div className="font-bold text-sm flex items-center gap-2">
-                                {isMatch ? HE.settings.match : HE.settings.mismatch}
+                                {isMatch ? t('settings.match') : t('settings.mismatch')}
                                 {!isMatch && (
                                     <span className="text-xs font-normal opacity-90 truncate">
                                         ({missingReqs.join(', ')})
@@ -458,7 +448,7 @@ export function ApartmentDetails() {
                         <button
                             onClick={() => setIsEditingReqs(true)}
                             className="p-1 hover:bg-black/5 rounded-full transition-colors flex-shrink-0"
-                            title="ערוך דרישות"
+                            title={t('settings.editPreferences') || "ערוך דרישות"}
                         >
                             <Edit size={14} />
                         </button>
@@ -467,13 +457,13 @@ export function ApartmentDetails() {
 
                 <div className="grid grid-cols-2 gap-3 mt-2"> {/* Reduced gap & margin */}
                     <div className="bg-gray-50 p-2 rounded-xl text-center"> {/* Reduced padding */}
-                        <span className="block text-gray-500 text-xs">{HE.apartment.price}</span>
+                        <span className="block text-gray-500 text-xs">{t('apartment.price')}</span>
                         <span className="text-lg font-bold text-gray-900">{apartment.price.toLocaleString()} ₪</span>
                     </div>
                     {apartment.link && (
                         <a href={apartment.link} target="_blank" rel="noopener noreferrer" className="bg-blue-50 p-2 rounded-xl text-center flex flex-col items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors">
                             <ExternalLink size={18} className="mb-0.5" />
-                            <span className="text-xs font-medium">{HE.apartment.link}</span>
+                            <span className="text-xs font-medium">{t('apartment.link')}</span>
                         </a>
                     )}
                 </div>
@@ -486,7 +476,7 @@ export function ApartmentDetails() {
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                         <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
                             <Eye className="text-blue-500" size={18} />
-                            <h2 className="font-bold text-gray-800 text-sm">{HE.apartment.phases?.scouting || 'פרטים יבשים'}</h2>
+                            <h2 className="font-bold text-gray-800 text-sm">{t('apartment.phases.scouting')}</h2>
                         </div>
                         <p className="text-gray-600 text-sm whitespace-pre-wrap">{apartment.notes}</p>
                     </div>
@@ -496,16 +486,16 @@ export function ApartmentDetails() {
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
                         <Phone className="text-green-500" size={20} />
-                        <h2 className="font-bold text-gray-800">{HE.apartment.phases?.phone || 'בדיקה טלפונית'}</h2>
+                        <h2 className="font-bold text-gray-800">{t('apartment.phases.phone')}</h2>
                     </div>
                     <div className="space-y-1">
-                        {renderBooleanItem('elevator', HE.apartment.elevator)}
-                        {renderBooleanItem('parking', 'חניה?')}
-                        {renderBooleanItem('balcony', 'מרפסת?')}
-                        {renderBooleanItem('pets', HE.apartment.pets)}
-                        {renderBooleanItem('furnished', HE.apartment.furnished)}
-                        {renderBooleanItem('brokerFee', HE.apartment.brokerFee)}
-                        {renderBooleanItem('tama38', HE.apartment.tama38)}
+                        {renderBooleanItem('elevator', t('apartment.elevator'))}
+                        {renderBooleanItem('parking', t('apartment.parking'))}
+                        {renderBooleanItem('balcony', t('apartment.balcony'))}
+                        {renderBooleanItem('pets', t('apartment.pets'))}
+                        {renderBooleanItem('furnished', t('apartment.furnished'))}
+                        {renderBooleanItem('brokerFee', t('apartment.brokerFee'))}
+                        {renderBooleanItem('tama38', t('apartment.tama38'))}
 
                         {/* Custom Phone Items */}
                         {checklistTemplates.filter(t => t.phase === 'phone').map(t => renderCustomItem(t))}
@@ -516,17 +506,17 @@ export function ApartmentDetails() {
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
                         <Check className="text-purple-500" size={20} />
-                        <h2 className="font-bold text-gray-800">{HE.apartment.phases?.visit || 'ביקור בדירה'}</h2>
+                        <h2 className="font-bold text-gray-800">{t('apartment.phases.visit')}</h2>
                     </div>
                     <div className="space-y-1">
-                        {renderBooleanItem('naturalLight', HE.apartment.naturalLight)}
-                        {renderBooleanItem('waterPressure', HE.apartment.waterPressure)}
-                        {renderBooleanItem('noiseLevel', HE.apartment.noiseLevel)}
-                        {renderBooleanItem('doubleGlazed', HE.apartment.doubleGlazed)}
-                        {renderBooleanItem('mobileReception', HE.apartment.mobileReception)}
-                        {renderBooleanItem('moldCheck', 'עובש / רטיבות?')}
-                        {renderBooleanItem('bars', 'סורגים?')}
-                        {renderBooleanItem('ac', 'מזגן בכל חדר?')}
+                        {renderBooleanItem('naturalLight', t('apartment.naturalLight'))}
+                        {renderBooleanItem('waterPressure', t('apartment.waterPressure'))}
+                        {renderBooleanItem('noiseLevel', t('apartment.noiseLevel'))}
+                        {renderBooleanItem('doubleGlazed', t('apartment.doubleGlazed'))}
+                        {renderBooleanItem('mobileReception', t('apartment.mobileReception'))}
+                        {renderBooleanItem('moldCheck', t('apartment.moldCheck'))}
+                        {renderBooleanItem('bars', t('apartment.bars'))}
+                        {renderBooleanItem('ac', t('apartment.ac'))}
 
                         {/* Custom Visit Items */}
                         {checklistTemplates.filter(t => t.phase === 'visit').map(t => renderCustomItem(t))}
@@ -537,13 +527,13 @@ export function ApartmentDetails() {
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
                         <FileSignature className="text-orange-500" size={20} />
-                        <h2 className="font-bold text-gray-800">{HE.apartment.phases?.signing || 'חוזה וחתימה'}</h2>
+                        <h2 className="font-bold text-gray-800">{t('apartment.phases.signing')}</h2>
                     </div>
                     <div className="space-y-1">
                         {/* Custom Signing Items */}
                         {checklistTemplates.filter(t => t.phase === 'signing').map(t => renderCustomItem(t))}
                         {checklistTemplates.filter(t => t.phase === 'signing').length === 0 && (
-                            <p className="text-gray-400 text-sm italic">לא הוגדרו שאלות לשלב זה. ניתן להוסיף בהגדרות.</p>
+                            <p className="text-gray-400 text-sm italic">{t('settings.noSigningQuestions')}</p>
                         )}
                     </div>
                 </div>

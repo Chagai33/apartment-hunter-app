@@ -3,17 +3,19 @@ import { useAuth } from '../../../context/AuthContext';
 import { db } from '../../../lib/firebase';
 import { collection, doc, setDoc, updateDoc, arrayUnion, query, where, getDocs, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { Group } from '../../../types';
-import { HE } from '../../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Users, Copy, Check, LogOut, Plus, ArrowRight } from 'lucide-react';
+import { Users, Copy, Check, LogOut, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function GroupManagement() {
     const { user } = useAuth();
+    const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
     const [joinCode, setJoinCode] = useState('');
     const [copied, setCopied] = useState(false);
+    const isRtl = i18n.dir() === 'rtl';
 
     // Listen to User's Group ID changes in real-time
     useEffect(() => {
@@ -63,7 +65,7 @@ export function GroupManagement() {
         const timeoutId = setTimeout(() => {
             setLoading((current) => {
                 if (current) {
-                    toast.error('הפעולה נמשכת זמן רב מדי, נסה שוב');
+                    toast.error(t('groups.errors.timeout'));
                     return false;
                 }
                 return current;
@@ -79,7 +81,7 @@ export function GroupManagement() {
                 inviteCode: code,
                 createdAt: serverTimestamp(),
                 createdBy: user.uid,
-                name: 'הקבוצה שלי'
+                name: t('groups.defaultGroupName')
             };
 
             // 1. Create group
@@ -88,10 +90,10 @@ export function GroupManagement() {
             // 2. Update user with groupId (Using setDoc with merge to ensure it works even if user doc is missing)
             await setDoc(doc(db, 'users', user.uid), { groupId: groupRef.id }, { merge: true });
 
-            toast.success(HE.groups.createTitle);
+            toast.success(t('groups.createTitle'));
         } catch (error) {
             console.error(error);
-            toast.error(HE.groups.errors.createFailed);
+            toast.error(t('groups.errors.createFailed'));
         } finally {
             clearTimeout(timeoutId);
             setLoading(false);
@@ -105,7 +107,7 @@ export function GroupManagement() {
         const timeoutId = setTimeout(() => {
             setLoading((current) => {
                 if (current) {
-                    toast.error('הפעולה נמשכת זמן רב מדי');
+                    toast.error(t('groups.errors.timeout'));
                     return false;
                 }
                 return current;
@@ -118,7 +120,7 @@ export function GroupManagement() {
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
-                toast.error(HE.groups.errors.invalidCode);
+                toast.error(t('groups.errors.invalidCode'));
                 setLoading(false);
                 return;
             }
@@ -127,7 +129,7 @@ export function GroupManagement() {
             const groupData = groupDoc.data();
 
             if (groupData.memberIds.includes(user.uid)) {
-                toast.error(HE.groups.errors.alreadyMember);
+                toast.error(t('groups.errors.alreadyMember'));
                 setLoading(false);
                 return;
             }
@@ -140,10 +142,10 @@ export function GroupManagement() {
             // Upsert user doc with new group ID
             await setDoc(doc(db, 'users', user.uid), { groupId: groupDoc.id }, { merge: true });
 
-            toast.success('הצטרפת לקבוצה בהצלחה!');
+            toast.success(t('groups.joinSuccess'));
         } catch (error) {
             console.error(error);
-            toast.error(HE.groups.errors.joinFailed);
+            toast.error(t('groups.errors.joinFailed'));
         } finally {
             clearTimeout(timeoutId);
             setLoading(false);
@@ -155,12 +157,12 @@ export function GroupManagement() {
             navigator.clipboard.writeText(currentGroup.inviteCode);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-            toast.success(HE.groups.copied);
+            toast.success(t('groups.copied'));
         }
     };
 
     const leaveGroup = async () => {
-        if (!confirm('האם אתה בטוח שברצונך לעזוב את הקבוצה?')) return;
+        if (!confirm(t('groups.confirmLeave'))) return;
         if (!user || !currentGroup) return;
 
         try {
@@ -171,10 +173,10 @@ export function GroupManagement() {
             await updateDoc(doc(db, 'users', user.uid), { groupId: null });
 
             setCurrentGroup(null);
-            toast.success('עזבת את הקבוצה');
+            toast.success(t('groups.leaveSuccess'));
         } catch (error) {
             console.error(error);
-            toast.error(HE.common.error);
+            toast.error(t('common.error'));
         }
     };
 
@@ -185,13 +187,13 @@ export function GroupManagement() {
                     <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Users size={32} />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">{HE.groups.yourGroup}</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">{t('groups.yourGroup')}</h2>
                     <p className="text-gray-500 mb-6">
-                        {HE.groups.members}: {currentGroup.memberIds.length}
+                        {t('groups.members')}: {currentGroup.memberIds.length}
                     </p>
 
                     <div className="bg-gray-50 p-4 rounded-xl border border-dashed border-gray-300 mb-6">
-                        <p className="text-sm text-gray-500 mb-1">{HE.groups.inviteCode}</p>
+                        <p className="text-sm text-gray-500 mb-1">{t('groups.inviteCode')}</p>
                         <div className="flex items-center justify-center gap-3">
                             <span className="text-2xl font-mono font-bold tracking-wider text-gray-800">
                                 {currentGroup.inviteCode}
@@ -210,13 +212,13 @@ export function GroupManagement() {
                         className="text-red-500 text-sm hover:bg-red-50 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 mx-auto"
                     >
                         <LogOut size={16} />
-                        {HE.groups.leave}
+                        {t('groups.leave')}
                     </button>
                 </div>
 
                 <div className="mt-8 text-center">
                     <Link to="/" className="text-blue-600 font-medium flex items-center justify-center gap-1 hover:underline">
-                        חזרה לדירות <ArrowRight size={16} />
+                        {t('groups.backToApartments')} {isRtl ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
                     </Link>
                 </div>
             </div>
@@ -225,18 +227,18 @@ export function GroupManagement() {
 
     return (
         <div className="p-4 pb-20">
-            <h1 className="text-2xl font-bold mb-6 text-center">{HE.groups.title}</h1>
+            <h1 className="text-2xl font-bold mb-6 text-center">{t('groups.title')}</h1>
 
             <div className="grid gap-6">
                 {/* Join Group */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <h2 className="font-bold text-lg mb-4 text-gray-800">{HE.groups.joinTitle}</h2>
+                    <h2 className="font-bold text-lg mb-4 text-gray-800">{t('groups.joinTitle')}</h2>
                     <div className="flex gap-2">
                         <input
                             type="text"
                             value={joinCode}
                             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                            placeholder={HE.groups.codePlaceholder}
+                            placeholder={t('groups.codePlaceholder')}
                             className="flex-1 p-3 border rounded-xl text-center font-mono placeholder:font-sans uppercase"
                             maxLength={6}
                         />
@@ -246,29 +248,29 @@ export function GroupManagement() {
                         disabled={loading || joinCode.length < 5}
                         className="w-full mt-3 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? HE.common.loading : HE.groups.join}
+                        {loading ? t('common.loading') : t('groups.join')}
                     </button>
                 </div>
 
                 <div className="relative flex py-2 items-center">
                     <div className="flex-grow border-t border-gray-200"></div>
-                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">{HE.auth.or}</span>
+                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">{t('auth.or')}</span>
                     <div className="flex-grow border-t border-gray-200"></div>
                 </div>
 
                 {/* Create Group */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
-                    <h2 className="font-bold text-lg mb-2 text-gray-800">{HE.groups.createTitle}</h2>
-                    <p className="text-gray-500 text-sm mb-4">צור קבוצה חדשה והזמן את השותפים שלך</p>
+                    <h2 className="font-bold text-lg mb-2 text-gray-800">{t('groups.createTitle')}</h2>
+                    <p className="text-gray-500 text-sm mb-4">{t('groups.createSubtitle')}</p>
                     <button
                         onClick={createGroup}
                         disabled={loading}
                         className="w-full bg-white border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
                     >
-                        {loading ? HE.common.loading : (
+                        {loading ? t('common.loading') : (
                             <>
                                 <Plus size={20} />
-                                {HE.groups.create}
+                                {t('groups.create')}
                             </>
                         )}
                     </button>

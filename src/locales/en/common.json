@@ -1,0 +1,227 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish",
+        "add": "Add",
+        "close": "Close",
+        "search": "Search",
+        "trash": "Trash",
+        "restore": "Restore",
+        "deletePermanently": "Delete Permanently",
+        "emptyTrash": "Trash is empty",
+        "confirmDelete": "Are you sure you want to delete this apartment?",
+        "deleteSuccess": "Apartment moved to trash",
+        "restoreSuccess": "Apartment restored successfully",
+        "deletePermanentConfirm": "This action will permanently delete the apartment and cannot be undone. Continue?",
+        "deletePermanentSuccess": "Apartment permanently deleted",
+        "saveChanges": "Save Changes"
+    },
+    "nav": {
+        "appName": "Apartment Hunter",
+        "hello": "Hello,",
+        "logout": "Logout",
+        "toggleLang": "עברית",
+        "settings": "Settings",
+        "trash": "Trash",
+        "myApartments": "My Apartments",
+        "dashboard": "Dashboard"
+    },
+    "footer": {
+        "developedBy": "Developed by",
+        "developerName": "Chagai Yechiel",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "accessibility": "Accessibility Statement",
+        "legal": "Legal",
+        "rights": "All rights reserved"
+    },
+    "auth": {
+        "loginTitle": "Welcome to Apartment Hunter",
+        "loginSubtitle": "Sign in to manage your apartment search",
+        "loginGoogle": "Sign in with Google",
+        "loginAnonymously": "Guest Login (No Cloud Save)",
+        "loginWithEmail": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "******",
+        "or": "OR",
+        "logout": "Logout",
+        "forgotPassword": "Forgot Password?",
+        "resetPassword": "Reset Password",
+        "resetEmailSent": "Password reset email sent successfully!",
+        "backToLogin": "Back to Login",
+        "preAuth": {
+            "title": "Before you continue",
+            "description": "To verify your identity and protect your personal information, we use Google Sign-In. We will request access to your:",
+            "scopeProfile": "Basic Profile Info (Name, Picture)",
+            "scopeEmail": "Email Address",
+            "reason": "This information allows us to create your personal account and ensure you can access your saved apartments from any device.",
+            "continue": "I Understand, Continue to Google"
+        }
+    },
+    "landing": {
+        "heroTitle": "Find Your Next Home.",
+        "heroSubtitle": "The smart way to track, manage, and share your apartment hunt.",
+        "ctaStart": "Get Started",
+        "ctaLogin": "Login",
+        "features": {
+            "single": {
+                "title": "Flying Solo?",
+                "desc": "Keep all your notes, photos, and decisions in one private place. No more messy spreadsheets."
+            },
+            "couples": {
+                "title": "Moving Together?",
+                "desc": "Sync your search with your partner. See what they liked, comment on apartments, and decide together."
+            },
+            "roommates": {
+                "title": "Roommates?",
+                "desc": "Vote on apartments, share costs, and manage the hunt as a team. Transparency is key."
+            }
+        },
+        "copyright": "© 2026 Apartment Hunter. Built by Chagai Yehiel."
+    },
+    "settings": {
+        "title": "Search Settings",
+        "subtitle": "Define must-haves for your apartment to get alerts",
+        "saveSuccess": "Settings saved successfully",
+        "mustHaves": "Must Haves",
+        "budget": "Budget & Rooms",
+        "minRooms": "Min Rooms",
+        "maxPrice": "Max Budget",
+        "match": "Matches Requirements",
+        "mismatch": "Does Not Match",
+        "missing": "Missing: ",
+        "savedProfiles": "Saved Profiles",
+        "newProfilePlaceholder": "New Profile Name (e.g., Investors)",
+        "profileSaved": "Profile saved!",
+        "profileLoaded": "Profile loaded!",
+        "noProfiles": "No saved profiles",
+        "load": "Load",
+        "customChecklist": "Custom Checklist",
+        "customChecklistSubtitle": "Add fixed questions for every apartment",
+        "newQuestionPlaceholder": "Your question (e.g., Is there a balcony?)",
+        "noCustomQuestions": "No custom questions",
+        "noSigningQuestions": "No questions defined for this phase.",
+        "dataManagement": "Data Management",
+        "editMustHaves": "Edit Must-Haves",
+        "editPreferences": "Edit Preferences",
+        "requirementsTitle": "Search Requirements (Budget & Needs)",
+        "phasesShort": {
+            "phone": "Phone",
+            "visit": "Visit",
+            "signing": "Contract"
+        }
+    },
+    "groups": {
+        "title": "Partner Management",
+        "createTitle": "Create New Group",
+        "joinTitle": "Join Existing Group",
+        "yourGroup": "My Group",
+        "members": "Members",
+        "inviteCode": "Invite Code:",
+        "create": "Create Group",
+        "join": "Join",
+        "leave": "Leave Group",
+        "codePlaceholder": "Enter Group Code (e.g., A7X92)",
+        "shareTitle": "Share code with your partner",
+        "copy": "Copy",
+        "copied": "Copied!",
+        "noGroup": "You are not in a group yet.",
+        "errors": {
+            "invalidCode": "Invalid code or group does not exist",
+            "alreadyMember": "You are already a member of this group",
+            "createFailed": "Failed to create group",
+            "joinFailed": "Failed to join group",
+            "timeout": "Operation timed out, please try again"
+        },
+        "confirmLeave": "Are you sure you want to leave the group?",
+        "leaveSuccess": "You have left the group",
+        "joinSuccess": "Successfully joined the group!",
+        "backToApartments": "Back to Apartments",
+        "createSubtitle": "Create a new group and invite your partners",
+        "defaultGroupName": "My Group"
+    },
+    "apartment": {
+        "addNew": "Add New Apartment",
+        "details": "Details",
+        "createdAt": "Added on: ",
+        "address": "Address / Street",
+        "price": "Rent (₪)",
+        "neighborhood": "Neighborhood",
+        "rooms": "Rooms",
+        "link": "Ad Link",
+        "notes": "General Notes",
+        "elevator": "Elevator?",
+        "tama38": "TAMA 38 / Pinui Binui?",
+        "hoaFee": "HOA Fee (₪)",
+        "arnona": "Arnona (Bi-monthly - ₪)",
+        "entryDate": "Entry Date",
+        "furnished": "Furnished?",
+        "pets": "Pets Allowed?",
+        "parking": "Parking?",
+        "balcony": "Balcony?",
+        "brokerFee": "Broker Fee?",
+        "noiseLevel": "Street/Neighbor Noise",
+        "waterPressure": "Water Pressure OK?",
+        "naturalLight": "Natural Light",
+        "doubleGlazed": "Double Glazed Windows?",
+        "moldCheck": "Mold / Dampness?",
+        "mobileReception": "Mobile Reception",
+        "bars": "Bars (Windows)?",
+        "ac": "AC in every room?",
+        "status": {
+            "new": "New",
+            "called": "Called",
+            "visited": "Visited",
+            "rejected": "Rejected"
+        },
+        "phases": {
+            "scouting": "Scouting",
+            "phone": "Phone Check",
+            "visit": "Visit",
+            "signing": "Signing"
+        },
+        "notFound": "Apartment not found",
+        "saveNoteError": "Error saving note",
+        "addNotePlaceholder": "Add a note...",
+        "lastUpdatedBy": "Last updated by",
+        "quickSummary": "Quick Summary",
+        "contains": "Property includes:",
+        "noDetails": "No details marked yet",
+        "generalNotes": "General Notes:",
+        "loadingLong": "Loading is taking too long, try refreshing",
+        "updateSuccess": "Apartment updated successfully",
+        "addSuccess": "Apartment added successfully",
+        "mamad": "Safe Room (Mamad)",
+        "warehouse": "Storage"
+    },
+    "gallery": {
+        "upload": "Upload Photos",
+        "uploading": "Uploading..."
+    },
+    "dashboard": {
+        "total": "Total Apartments",
+        "favorites": "Favorites",
+        "seen": "Seen",
+        "emptyTitle": "No apartments added yet",
+        "emptySubtitle": "Time to start hunting! 🏠",
+        "cta": "Add First Apartment"
+    },
+    "accessibility": {
+        "statement": "This app is accessible to all users, following WCAG 2.2 AA standards. Features include semantic HTML, focus management, and ARIA support.",
+        "features": {
+            "focus": "Focus Trapping in Modals",
+            "aria": "Screen Reader Announcements",
+            "contrast": "High Contrast Text"
+        }
+    }
+}

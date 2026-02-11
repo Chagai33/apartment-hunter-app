@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Camera, X } from 'lucide-react';
 import { useStorage } from '../../../hooks/useStorage';
-import { HE } from '../../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 import { Timestamp } from 'firebase/firestore';
 
@@ -20,6 +20,7 @@ interface ImageUploaderProps {
 
 export function ImageUploader({ images, onImagesChange, userId, apartmentId }: ImageUploaderProps) {
     const { uploadImage, progress, uploading } = useStorage();
+    const { t } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,9 +54,10 @@ export function ImageUploader({ images, onImagesChange, userId, apartmentId }: I
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h3 className="font-medium text-gray-900">{HE.gallery.upload}</h3>
+                <h3 className="font-medium text-gray-900">{t('gallery.upload')}</h3>
                 <span className="text-sm text-gray-500">{images.length} images</span>
             </div>
+
 
             <div className="grid grid-cols-3 gap-4">
                 {images.map((img, index) => (
@@ -88,7 +90,7 @@ export function ImageUploader({ images, onImagesChange, userId, apartmentId }: I
                     ) : (
                         <>
                             <Camera size={24} className="mb-1" />
-                            <span className="text-xs">{HE.gallery.upload}</span>
+                            <span className="text-xs">{t('gallery.upload')}</span>
                         </>
                     )}
                 </button>

@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AppShell } from './components/layout/AppShell';
 import { LoginPage } from './components/features/auth/LoginPage';
+import { LandingPage } from './components/layout/LandingPage';
 import { ApartmentList } from './components/features/apartments/ApartmentList';
 import { ApartmentForm } from './components/features/apartments/ApartmentForm';
 import { ApartmentDetails } from './components/features/apartments/ApartmentDetails';
@@ -12,12 +13,15 @@ import { GroupManagement } from './components/features/groups/GroupManagement';
 import { PrivacyPolicy } from './components/features/legal/PrivacyPolicy';
 import { TermsOfService } from './components/features/legal/TermsOfService';
 import { AccessibilityStatement } from './components/features/legal/AccessibilityStatement';
-import { HE } from './lib/i18n';
+
+
+import { useTranslation } from 'react-i18next'; // Add import
 
 function AuthGuard({ children }: { children: JSX.Element }) {
     const { user, loading } = useAuth();
+    const { t } = useTranslation();
 
-    if (loading) return <div className="p-10 text-center">{HE.common.loading}</div>;
+    if (loading) return <div className="p-10 text-center">{t('common.loading')}</div>;
     if (!user) return <Navigate to="/login" replace />;
 
     return children;
@@ -31,7 +35,8 @@ export default function App() {
                     <AppShell>
                         <Routes>
                             <Route path="/login" element={<LoginPage />} />
-                            <Route path="/" element={
+                            <Route path="/" element={<LandingPage />} />
+                            <Route path="/dashboard" element={
                                 <AuthGuard>
                                     <ApartmentList />
                                 </AuthGuard>

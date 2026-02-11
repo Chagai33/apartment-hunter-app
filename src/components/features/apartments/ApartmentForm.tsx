@@ -5,7 +5,7 @@ import { doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from 'fir
 import { db } from '../../../lib/firebase';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { HE } from '../../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../../common/Input';
 import { Apartment } from '../../../types';
 
@@ -13,6 +13,7 @@ export function ApartmentForm() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useTranslation();
 
     // "loading" for submission, "fetching" for initial data load
     const [submitting, setSubmitting] = useState(false);
@@ -61,7 +62,7 @@ export function ApartmentForm() {
                 }
             } catch (error) {
                 console.error("Error loading apartment:", error);
-                toast.error(HE.common.error);
+                toast.error(t('common.error'));
                 navigate('/');
             } finally {
                 if (isMounted) setFetching(false);
@@ -73,7 +74,7 @@ export function ApartmentForm() {
         return () => {
             isMounted = false;
         };
-    }, [id, reset, navigate]);
+    }, [id, reset, navigate, t]);
 
     const onSubmit = async (data: any) => {
         if (!user) return;
@@ -107,7 +108,7 @@ export function ApartmentForm() {
                     rooms: Number(data.rooms),
                     ...userInfo
                 });
-                toast.success('הדירה עודכנה בהצלחה');
+                toast.success(t('apartment.updateSuccess'));
             } else {
                 // Create new
                 // For new apartments, we set createdBy AND lastUpdatedBy
@@ -121,8 +122,7 @@ export function ApartmentForm() {
                     createdAt: timestamp,
                     createdBy: user.uid,
                     createdByName: user.displayName || user.email || 'Unknown',
-                    ...userInfo,
-                    ...userInfo,
+                    ...userInfo, // spread again strictly for safety, though redundant with above
                     // Init flags (default false if undefined, but form should handle this via register)
                     elevator: data.elevator || false,
                     parking: data.parking || false,
@@ -134,7 +134,7 @@ export function ApartmentForm() {
                     brokerFee: false, // Not in form yet
                 };
                 await addDoc(collection(db, 'apartments'), newApartmentData);
-                toast.success('הדירה נוספה בהצלחה');
+                toast.success(t('apartment.addSuccess'));
             }
 
             // Small delay for UX
@@ -144,7 +144,7 @@ export function ApartmentForm() {
 
         } catch (error) {
             console.error(error);
-            toast.error(HE.common.error);
+            toast.error(t('common.error'));
         } finally {
             setSubmitting(false);
         }
@@ -159,64 +159,63 @@ export function ApartmentForm() {
     }
 
     return (
-        <div className="p-4 pb-24">
-            <h1 className="text-2xl font-bold mb-6">{id ? HE.common.edit : HE.apartment.addNew}</h1>
+        <div className="p-4 pb-24 max-w-2xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6">{id ? t('common.edit') : t('apartment.addNew')}</h1>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <Input label={HE.apartment.address} {...register('address', { required: true })} />
-                <Input label={HE.apartment.neighborhood} {...register('neighborhood', { required: true })} />
-                <Input label={HE.apartment.price} type="number" {...register('price', { required: true })} />
+                <Input label={t('apartment.address')} {...register('address', { required: true })} />
+                <Input label={t('apartment.neighborhood')} {...register('neighborhood', { required: true })} />
+                <div className="grid grid-cols-2 gap-4">
+                    <Input label={t('apartment.price')} type="number" {...register('price', { required: true })} />
 
-                {/* Rooms Input */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700">חדרים</label>
-                    <input
-                        type="number"
-                        step="0.5"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                        {...register('rooms')}
-                    />
+                    {/* Rooms Input */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700">{t('apartment.rooms')}</label>
+                        <input
+                            type="number"
+                            step="0.5"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                            {...register('rooms')}
+                        />
+                    </div>
                 </div>
 
                 {/* Link Input */}
-                <Input label={HE.apartment.link} type="url" {...register('link')} placeholder="https://..." />
-
-                {/* Link Input */}
-                <Input label={HE.apartment.link} type="url" {...register('link')} placeholder="https://..." />
+                <Input label={t('apartment.link')} type="url" {...register('link')} placeholder="https://..." />
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                     <label className="flex items-center space-x-2 space-x-reverse cursor-pointer bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                         <input type="checkbox" {...register('elevator')} className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-                        <span className="text-gray-700 font-medium mr-2">{HE.apartment.elevator}</span>
+                        <span className="text-gray-700 font-medium mr-2">{t('apartment.elevator')}</span>
                     </label>
                     <label className="flex items-center space-x-2 space-x-reverse cursor-pointer bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                         <input type="checkbox" {...register('parking')} className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-                        <span className="text-gray-700 font-medium mr-2">חניה</span>
+                        <span className="text-gray-700 font-medium mr-2">{t('apartment.parking')}</span>
                     </label>
                     <label className="flex items-center space-x-2 space-x-reverse cursor-pointer bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                         <input type="checkbox" {...register('balcony')} className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-                        <span className="text-gray-700 font-medium mr-2">מרפסת</span>
+                        <span className="text-gray-700 font-medium mr-2">{t('apartment.balcony')}</span>
                     </label>
                     <label className="flex items-center space-x-2 space-x-reverse cursor-pointer bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                         <input type="checkbox" {...register('ac')} className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-                        <span className="text-gray-700 font-medium mr-2">מזגן</span>
+                        <span className="text-gray-700 font-medium mr-2">{t('apartment.ac')}</span>
                     </label>
                     <label className="flex items-center space-x-2 space-x-reverse cursor-pointer bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                         <input type="checkbox" {...register('tama38')} className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-                        <span className="text-gray-700 font-medium mr-2">ממ״ד / תמ״א</span>
+                        <span className="text-gray-700 font-medium mr-2">{t('apartment.mamad')}</span>
                     </label>
                     <label className="flex items-center space-x-2 space-x-reverse cursor-pointer bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                         <input type="checkbox" {...register('pets')} className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-                        <span className="text-gray-700 font-medium mr-2">{HE.apartment.pets}</span>
+                        <span className="text-gray-700 font-medium mr-2">{t('apartment.pets')}</span>
                     </label>
                     <label className="flex items-center space-x-2 space-x-reverse cursor-pointer bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition-colors">
                         <input type="checkbox" {...register('furnished')} className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-                        <span className="text-gray-700 font-medium mr-2">{HE.apartment.furnished}</span>
+                        <span className="text-gray-700 font-medium mr-2">{t('apartment.furnished')}</span>
                     </label>
                 </div>
 
                 <div className="flex flex-col gap-1 mt-4">
-                    <label className="text-sm font-medium text-gray-700">{HE.apartment.notes}</label>
+                    <label className="text-sm font-medium text-gray-700">{t('apartment.notes')}</label>
                     <textarea
                         className="p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                         rows={3}
@@ -225,7 +224,7 @@ export function ApartmentForm() {
                 </div>
 
                 <button type="submit" disabled={submitting} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold mt-8">
-                    {submitting ? HE.common.loading : HE.common.save}
+                    {submitting ? t('common.loading') : t('common.save')}
                 </button>
             </form>
         </div>

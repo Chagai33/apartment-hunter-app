@@ -1,0 +1,227 @@
+{
+    "common": {
+        "loading": "טוען...",
+        "error": "אירעה שגיאה",
+        "save": "שמור",
+        "cancel": "ביטול",
+        "edit": "ערוך",
+        "delete": "מחק",
+        "back": "חזור",
+        "next": "הבא",
+        "finish": "סיים",
+        "add": "הוסף",
+        "close": "סגור",
+        "search": "חיפוש",
+        "trash": "סל מחזור",
+        "restore": "שחזר",
+        "deletePermanently": "מחק לצמיתות",
+        "emptyTrash": "סל המחזור ריק",
+        "confirmDelete": "האם אתה בטוח שברצונך למחוק דירה זו?",
+        "deleteSuccess": "הדירה הועברה לסל המחזור",
+        "restoreSuccess": "הדירה שוחזרה בהצלחה",
+        "deletePermanentConfirm": "פעולה זו תמחק את הדירה לצמיתות ולא ניתן יהיה לשחזר אותה. להמשיך?",
+        "deletePermanentSuccess": "הדירה נמחקה לצמיתות",
+        "saveChanges": "שמור שינויים"
+    },
+    "nav": {
+        "appName": "Apartment Hunter",
+        "hello": "שלום,",
+        "logout": "התנתק",
+        "toggleLang": "English",
+        "settings": "הגדרות",
+        "trash": "סל מחזור",
+        "myApartments": "הדירות שלי",
+        "dashboard": "לוח הדירות"
+    },
+    "footer": {
+        "developedBy": "פותח ע\"י",
+        "developerName": "חגי יחיאל",
+        "terms": "תנאי שימוש",
+        "privacy": "מדיניות פרטיות",
+        "accessibility": "הצהרת נגישות",
+        "legal": "מידע משפטי",
+        "rights": "כל הזכויות שמורות"
+    },
+    "auth": {
+        "loginTitle": "ברוכים הבאים ל-Apartment Hunter",
+        "loginSubtitle": "התחבר כדי לנהל את חיפוש הדירה שלך",
+        "loginGoogle": "כניסה עם Google",
+        "loginAnonymously": "כניסה כאורח (ללא שמירה בענן)",
+        "loginWithEmail": "כניסה",
+        "register": "הרשמה",
+        "email": "אימייל",
+        "password": "סיסמה",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "******",
+        "or": "או",
+        "logout": "התנתק",
+        "forgotPassword": "שכחתי סיסמה?",
+        "resetPassword": "איפוס סיסמה",
+        "resetEmailSent": "מייל לאיפוס סיסמה נשלח בהצלחה!",
+        "backToLogin": "חזרה לכניסה",
+        "preAuth": {
+            "title": "לפני שממשיכים",
+            "description": "כדי לאמת את זהותך ולהגן על המידע האישי שלך, אנו משתמשים בכניסה דרך Google. אנו נבקש גישה ל:",
+            "scopeProfile": "פרטי פרופיל בסיסיים (שם, תמונה)",
+            "scopeEmail": "כתובת אימייל",
+            "reason": "מידע זה מאפשר לנו ליצור את החשבון האישי שלך ולהבטיח גישה לדירות השמורות שלך מכל מכשיר.",
+            "continue": "הבנתי, המשך ל-Google"
+        }
+    },
+    "landing": {
+        "heroTitle": "למצוא את הבית הבא שלך.",
+        "heroSubtitle": "הדרך החכמה לנהל, לעקוב ולשתף את חיפוש הדירה.",
+        "ctaStart": "התחל עכשיו",
+        "ctaLogin": "התחבר",
+        "features": {
+            "single": {
+                "title": "מחפשים לבד?",
+                "desc": "שמרו את כל ההערות, התמונות וההחלטות במקום פרטי אחד. בלי טבלאות אקסל מבולגנות."
+            },
+            "couples": {
+                "title": "עוברים לגור ביחד?",
+                "desc": "סנכרנו את החיפוש עם בן/בת הזוג. ראו מה הם אהבו, כתבו הערות על דירות והחליטו יחד."
+            },
+            "roommates": {
+                "title": "שותפים?",
+                "desc": "הצביעו על דירות, שתפו עלויות ונהלו את החיפוש כצוות. שקיפות היא המפתח."
+            }
+        },
+        "copyright": "© 2026 Apartment Hunter. נבנה ע״י חגי יחיאל."
+    },
+    "settings": {
+        "title": "הגדרות חיפוש",
+        "subtitle": "הגדר מה חייב להיות בדירה כדי שנדע להתריע לך",
+        "saveSuccess": "ההגדרות נשמרו בהצלחה",
+        "mustHaves": "דרישות חובה (Must Haves)",
+        "budget": "תקציב וחדרים",
+        "minRooms": "מינימום חדרים",
+        "maxPrice": "תקציב מקסימלי",
+        "match": "תואם לדרישות",
+        "mismatch": "לא תואם לדרישות",
+        "missing": "חסר: ",
+        "savedProfiles": "פרופילים שמורים",
+        "newProfilePlaceholder": "שם פרופיל חדש (למשל: למשקיעים)",
+        "profileSaved": "פרופיל נשמר!",
+        "profileLoaded": "פרופיל נטען!",
+        "noProfiles": "אין פרופילים שמורים",
+        "load": "טען",
+        "customChecklist": "צ'קליסט מותאם אישית",
+        "customChecklistSubtitle": "הוסף שאלות קבועות שיופיעו בכל דירה",
+        "newQuestionPlaceholder": "השאלה שלך (למשל: יש סורגים?)",
+        "noCustomQuestions": "אין שאלות מותאמות אישית",
+        "noSigningQuestions": "לא הוגדרו שאלות לשלב זה. ניתן להוסיף בהגדרות.",
+        "dataManagement": "ניהול נתונים",
+        "editMustHaves": "עריכת דרישות חובה",
+        "editPreferences": "ערוך דרישות",
+        "requirementsTitle": "הגדרות חיפוש (תקציב ודרישות)",
+        "phasesShort": {
+            "phone": "טלפוני",
+            "visit": "ביקור",
+            "signing": "חוזה"
+        }
+    },
+    "groups": {
+        "title": "ניהול שותפים",
+        "createTitle": "צור קבוצה חדשה",
+        "joinTitle": "הצטרף לקבוצה קיימת",
+        "yourGroup": "הקבוצה שלי",
+        "members": "חברים בקבוצה",
+        "inviteCode": "קוד הצטרפות:",
+        "create": "צור קבוצה",
+        "join": "הצטרף",
+        "leave": "עזוב קבוצה",
+        "codePlaceholder": "הכנס קוד קבוצה (למשל: A7X92)",
+        "shareTitle": "שתף את הקוד עם השותף/ה שלך",
+        "copy": "העתק",
+        "copied": "הועתק!",
+        "noGroup": "אתה לא חבר באף קבוצה כרגע.",
+        "errors": {
+            "invalidCode": "קוד לא תקין או שהקבוצה לא קיימת",
+            "alreadyMember": "אתה כבר חבר בקבוצה הזו",
+            "createFailed": "יצירת הקבוצה נכשלה",
+            "joinFailed": "ההצטרפות לקבוצה נכשלה",
+            "timeout": "הפעולה נמשכת זמן רב מדי, נסה שוב"
+        },
+        "confirmLeave": "האם אתה בטוח שברצונך לעזוב את הקבוצה?",
+        "leaveSuccess": "עזבת את הקבוצה",
+        "joinSuccess": "הצטרפת לקבוצה בהצלחה!",
+        "backToApartments": "חזרה לדירות",
+        "createSubtitle": "צור קבוצה חדשה והזמן את השותפים שלך",
+        "defaultGroupName": "הקבוצה שלי"
+    },
+    "apartment": {
+        "addNew": "הוסף דירה חדשה",
+        "details": "פרטים",
+        "createdAt": "נוסף בתאריך: ",
+        "address": "כתובת / רחוב",
+        "price": "שכר דירה (₪)",
+        "neighborhood": "שכונה",
+        "rooms": "מספר חדרים",
+        "link": "קישור למודעה",
+        "notes": "הערות כלליות",
+        "elevator": "מעלית?",
+        "tama38": "תמ״א 38 / פינוי בינוי?",
+        "hoaFee": "ועד בית (₪)",
+        "arnona": "ארנונה (לחודשיים - ₪)",
+        "entryDate": "תאריך כניסה",
+        "furnished": "האם מרוהטת?",
+        "pets": "האם מותר בע״ח?",
+        "parking": "חניה?",
+        "balcony": "מרפסת?",
+        "brokerFee": "תיווך?",
+        "noiseLevel": "רעש מהרחוב / שכנים",
+        "waterPressure": "זרם מים תקין?",
+        "naturalLight": "אור טבעי",
+        "doubleGlazed": "חלונות כפולים (בידוד)?",
+        "moldCheck": "עובש / רטיבות?",
+        "mobileReception": "קליטה סלולרית",
+        "bars": "סורגים?",
+        "ac": "מזגן בכל חדר?",
+        "status": {
+            "new": "טרם נוצר קשר",
+            "called": "בדיקה טלפונית",
+            "visited": "ביקור בדירה",
+            "rejected": "לא רלוונטי"
+        },
+        "phases": {
+            "scouting": "פרטים יבשים",
+            "phone": "בדיקה טלפונית",
+            "visit": "ביקור בדירה",
+            "signing": "חוזה וחתימה"
+        },
+        "notFound": "הדירה לא נמצאה",
+        "saveNoteError": "שגיאה בשמירת הערה",
+        "addNotePlaceholder": "הוסף הערה...",
+        "lastUpdatedBy": "עודכן לאחרונה ע\"י",
+        "quickSummary": "סיכום מהיר",
+        "contains": "יש בדירה:",
+        "noDetails": "עדיין לא סומנו פרטים",
+        "generalNotes": "הערות כלליות:",
+        "loadingLong": "הטעינה נמשכת זמן רב מדי, נסה לרענן",
+        "updateSuccess": "הדירה עודכנה בהצלחה",
+        "addSuccess": "הדירה נוספה בהצלחה",
+        "mamad": "ממ״ד",
+        "warehouse": "מחסן"
+    },
+    "gallery": {
+        "upload": "העלאת תמונות",
+        "uploading": "מעלה..."
+    },
+    "dashboard": {
+        "total": "סה״כ דירות",
+        "favorites": "מועדפים",
+        "seen": "דירות שראיתי",
+        "emptyTitle": "עדיין לא הוספת דירות לרשימה",
+        "emptySubtitle": "זה הזמן להתחיל לחפש! 🏠",
+        "cta": "הוסף דירה ראשונה"
+    },
+    "accessibility": {
+        "statement": "אפליקציה זו תוכננה להיות נגישה לכל המשתמשים, בהתאם לתקני WCAG 2.2 AA. הפיצ'רים כוללים HTML סמנטי, ניהול פוקוס, ותמיכה ב-ARIA.",
+        "features": {
+            "focus": "כליאת פוקוס (Focus Trapping) בחלונות מודאליים",
+            "aria": "הכרזות לקורא מסך",
+            "contrast": "טקסט בניגודיות גבוהה"
+        }
+    }
+}

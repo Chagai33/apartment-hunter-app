@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Home, MapPin, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { Apartment, ApartmentStatus } from '../../../types';
-import { HE } from '../../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 import { Timestamp } from 'firebase/firestore';
 
@@ -14,7 +14,8 @@ const statusColors: Record<ApartmentStatus, string> = {
 };
 
 export function ApartmentCard({ apartment }: { apartment: Apartment }) {
-    const statusLabel = HE.apartment.status[apartment.status];
+    const { t } = useTranslation();
+    const statusLabel = t(`apartment.status.${apartment.status}`);
     const thumbnail = apartment.images?.[0]?.url;
 
     // Format date
@@ -34,16 +35,16 @@ export function ApartmentCard({ apartment }: { apartment: Apartment }) {
     const generateSummary = () => {
         const positiveFields: string[] = [];
         const booleanFields: { key: keyof Apartment, label: string }[] = [
-            { key: 'elevator', label: HE.apartment.elevator },
-            { key: 'parking', label: 'חניה' },
-            { key: 'balcony', label: 'מרפסת' },
-            { key: 'pets', label: HE.apartment.pets },
-            { key: 'furnished', label: HE.apartment.furnished },
-            { key: 'tama38', label: HE.apartment.tama38 },
-            { key: 'ac', label: 'מזגן' },
-            { key: 'bars', label: 'סורגים' },
-            { key: 'doubleGlazed', label: 'חלונות כפולים' },
-            { key: 'naturalLight', label: 'אור טבעי' },
+            { key: 'elevator', label: t('apartment.elevator') },
+            { key: 'parking', label: t('apartment.parking') },
+            { key: 'balcony', label: t('apartment.balcony') },
+            { key: 'pets', label: t('apartment.pets') },
+            { key: 'furnished', label: t('apartment.furnished') },
+            { key: 'tama38', label: t('apartment.tama38') },
+            { key: 'ac', label: t('apartment.ac') },
+            { key: 'bars', label: t('apartment.bars') },
+            { key: 'doubleGlazed', label: t('apartment.doubleGlazed') },
+            { key: 'naturalLight', label: t('apartment.naturalLight') },
         ];
 
         booleanFields.forEach(({ key, label }) => {
@@ -94,7 +95,7 @@ export function ApartmentCard({ apartment }: { apartment: Apartment }) {
                             {dateStr && (
                                 <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md">
                                     <Calendar size={12} />
-                                    <span>{HE.apartment.createdAt}{dateStr}</span>
+                                    <span>{t('apartment.createdAt')}{dateStr}</span>
                                 </div>
                             )}
                         </div>
@@ -122,11 +123,11 @@ export function ApartmentCard({ apartment }: { apartment: Apartment }) {
                                 {item}
                             </li>
                         ))}
-                        {summaryItems.length === 0 && <li className="text-gray-400 text-xs italic">אין מאפיינים מסומנים</li>}
+                        {summaryItems.length === 0 && <li className="text-gray-400 text-xs italic">{t('apartment.noDetails')}</li>}
                     </ul>
                     {apartment.notes && (
                         <div className="mt-2 text-xs text-gray-600 border-t pt-2">
-                            <span className="font-bold">הערות: </span>
+                            <span className="font-bold">{t('apartment.notes')}: </span>
                             {apartment.notes}
                         </div>
                     )}

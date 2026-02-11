@@ -3,13 +3,14 @@ import { collection, query, where, orderBy, onSnapshot, doc, updateDoc, deleteDo
 import { db } from '../../../lib/firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { Apartment } from '../../../types';
-import { HE } from '../../../lib/i18n';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, Trash2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export function ApartmentTrash() {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [loading, setLoading] = useState(true);
     const [userGroupId, setUserGroupId] = useState<string | null>(null);
@@ -67,25 +68,25 @@ export function ApartmentTrash() {
                 deleted: false,
                 deletedAt: null
             });
-            toast.success(HE.common.restoreSuccess);
+            toast.success(t('common.restoreSuccess'));
         } catch (error) {
             console.error(error);
-            toast.error(HE.common.error);
+            toast.error(t('common.error'));
         }
     };
 
     const handlePermanentDelete = async (id: string) => {
-        if (!confirm(HE.common.deletePermanentConfirm)) return;
+        if (!confirm(t('common.deletePermanentConfirm'))) return;
         try {
             await deleteDoc(doc(db, 'apartments', id));
-            toast.success(HE.common.deletePermanentSuccess);
+            toast.success(t('common.deletePermanentSuccess'));
         } catch (error) {
             console.error(error);
-            toast.error(HE.common.error);
+            toast.error(t('common.error'));
         }
     };
 
-    if (loading) return <div className="p-8 text-center">{HE.common.loading}</div>;
+    if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
 
     return (
         <div className="p-4 pb-24">
@@ -93,13 +94,13 @@ export function ApartmentTrash() {
                 <Link to="/settings" className="p-2 rounded-full hover:bg-gray-100">
                     <ArrowLeft size={24} />
                 </Link>
-                <h1 className="text-2xl font-bold">{HE.common.trash}</h1>
+                <h1 className="text-2xl font-bold">{t('common.trash')}</h1>
             </div>
 
             {apartments.length === 0 ? (
                 <div className="text-center text-gray-500 mt-10">
                     <Trash2 size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>{HE.common.emptyTrash}</p>
+                    <p>{t('common.emptyTrash')}</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -113,14 +114,14 @@ export function ApartmentTrash() {
                                 <button
                                     onClick={() => handleRestore(apartment.id)}
                                     className="p-2 text-green-600 hover:bg-green-50 rounded-full"
-                                    title={HE.common.restore}
+                                    title={t('common.restore')}
                                 >
                                     <RefreshCw size={20} />
                                 </button>
                                 <button
                                     onClick={() => handlePermanentDelete(apartment.id)}
                                     className="p-2 text-red-600 hover:bg-red-50 rounded-full"
-                                    title={HE.common.deletePermanently}
+                                    title={t('common.deletePermanently')}
                                 >
                                     <Trash2 size={20} />
                                 </button>
