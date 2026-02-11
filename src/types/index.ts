@@ -20,6 +20,8 @@ export interface UserPreferences {
     mustHavePets?: boolean;
     mustHaveAC?: boolean;
     mustHaveMamad?: boolean; // Safe room
+    mustHaveTama38?: boolean;
+    mustHaveFurnished?: boolean;
 }
 
 export interface User {
@@ -56,6 +58,12 @@ export interface Apartment {
     // Dates
     createdAt: any; // Firestore Timestamp
     updatedAt: any;
+
+    // Tracking
+    createdBy?: string;
+    createdByName?: string;
+    lastUpdatedBy?: string;
+    lastUpdatedByName?: string;
 
     // Contact
     contactName?: string;

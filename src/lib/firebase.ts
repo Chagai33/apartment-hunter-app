@@ -4,12 +4,12 @@ import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBr_cTpmq9lR6pJ5XZSArV-6O3DjYQd_k8",
-    authDomain: "home-finder-app-2024.firebaseapp.com",
-    projectId: "home-finder-app-2024",
-    storageBucket: "home-finder-app-2024.firebasestorage.app",
-    messagingSenderId: "673067151097",
-    appId: "1:673067151097:web:993ccd64618b77a3d53c28"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);

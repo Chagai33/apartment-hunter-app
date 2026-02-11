@@ -1,4 +1,4 @@
-import { LogOut, User as UserIcon, Globe, ArrowRight, Settings, Users } from 'lucide-react';
+import { LogOut, User as UserIcon, Globe, ArrowRight, Settings, Users, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { HE } from '../../lib/i18n';
@@ -42,13 +42,22 @@ export function Navbar() {
             {/* Actions */}
             <div className="flex items-center gap-3">
                 {user && (
-                    <Link
-                        to="/groups"
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-                        title={HE.groups.title}
-                    >
-                        <Users size={24} />
-                    </Link>
+                    <>
+                        <Link
+                            to="/groups"
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                            title={HE.groups.title}
+                        >
+                            <Users size={24} />
+                        </Link>
+                        <Link
+                            to="/trash"
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                            title="סל מחזור"
+                        >
+                            <Trash2 size={24} />
+                        </Link>
+                    </>
                 )}
 
                 {/* Language Toggle */}

@@ -35,25 +35,18 @@ export function ApartmentList() {
         if (!user) return;
         setLoading(true);
 
+        // Query logic:
         let q;
 
         if (userGroupId) {
-            // If user has a group, fetch apartments for that group OR their own (legacy compatibility)
-            // Note: Firestore 'in' query supports up to 10 values. 
-            // Better approach: filter by groupId if exists, or userId.
-            // Complex OR queries in Firestore are tricky. 
-            // Strategy: We will query by groupId if present. If we want personal items too, we might need a composite index or separate queries.
-            // For this app, let's assume: If inside a group, we filter by 'groupId == userGroupId'.
-            // To migrate old personal items to group, we should have a migration script or just query both?
-            // "where 'groupId' == currentGroupId" 
-
+            // Group mode: Show apartments belonging to the group
             q = query(
                 collection(db, 'apartments'),
                 where('groupId', '==', userGroupId),
                 orderBy('createdAt', 'desc')
             );
         } else {
-            // Private mode
+            // Private mode: Show personal apartments
             q = query(
                 collection(db, 'apartments'),
                 where('userId', '==', user.uid),
@@ -62,7 +55,6 @@ export function ApartmentList() {
         }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            // We can also potentially merge in specific personal items if needed, but keeping it clean is better.
             const newApartments = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -72,7 +64,6 @@ export function ApartmentList() {
             setLoading(false);
         }, (error) => {
             console.error("Error fetching apartments:", error);
-            // Fallback or retry logic can go here
             setLoading(false);
         });
 

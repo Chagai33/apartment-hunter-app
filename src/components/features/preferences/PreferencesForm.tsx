@@ -170,10 +170,12 @@ export function PreferencesForm() {
                     </div>
                 </section>
 
-                {/* Budget & Rooms */}
+                {/* Main Profile Settings (Budget + Must Haves) */}
                 <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="font-bold text-gray-800 mb-3 border-b pb-2">{HE.settings.budget}</h2>
-                    <div className="grid grid-cols-2 gap-4">
+                    <h2 className="font-bold text-gray-800 mb-4 border-b pb-2">הגדרות חיפוש (תקציב ודרישות)</h2>
+
+                    {/* Budget & Rooms */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
                         <Input
                             label={HE.settings.maxPrice}
                             type="number"
@@ -185,18 +187,18 @@ export function PreferencesForm() {
                             {...register('minRooms', { valueAsNumber: true })}
                         />
                     </div>
-                </section>
 
-                {/* Must Haves */}
-                <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="font-bold text-gray-800 mb-3 border-b pb-2">{HE.settings.mustHaves}</h2>
-                    <div className="space-y-2">
+                    {/* Must Haves */}
+                    <h3 className="font-medium text-gray-700 mb-3 text-sm">דרישות חובה (Must Haves)</h3>
+                    <div className="grid grid-cols-1 gap-2">
                         <Toggle name="mustHaveElevator" label={HE.apartment.elevator} />
                         <Toggle name="mustHaveParking" label={HE.apartment.parking} />
                         <Toggle name="mustHaveBalcony" label={HE.apartment.balcony} />
                         <Toggle name="mustHaveAC" label={HE.apartment.ac} />
-                        <Toggle name="mustHaveMamad" label="ממ״ד (חדר ביטחון)" />
+                        <Toggle name="mustHaveMamad" label="ממ״ד" />
+                        <Toggle name="mustHaveTama38" label="תמ״א 38" />
                         <Toggle name="mustHavePets" label={HE.apartment.pets} />
+                        <Toggle name="mustHaveFurnished" label={HE.apartment.furnished} />
                     </div>
                 </section>
 

@@ -19,9 +19,22 @@ service cloud.firestore {
     
     // Groups
     match /groups/{groupId} {
-      allow read: if isAuthenticated() && request.auth.uid in resource.data.memberIds;
+      // Allow read for all auth users (needed to find group by code)
+      allow read: if isAuthenticated();
+      
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated() && request.auth.uid in resource.data.memberIds;
+      
+      allow update: if isAuthenticated() && (
+        // Case 1: Existing member updating the group
+        request.auth.uid in resource.data.memberIds ||
+        
+        // Case 2: New user joining (Adding themselves)
+        // Ensure they preserve existing members and add themselves
+        (
+          request.resource.data.memberIds.hasAll(resource.data.memberIds) &&
+          request.auth.uid in request.resource.data.memberIds
+        )
+      );
     }
 
     // Apartments

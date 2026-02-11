@@ -5,7 +5,7 @@ import { db } from '../../../lib/firebase';
 import { Apartment, UserPreferences, CustomChecklistTemplate } from '../../../types';
 import { useAuth } from '../../../context/AuthContext';
 import { HE } from '../../../lib/i18n';
-import { Edit, Phone, MapPin, ExternalLink, Check, Eye, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, MessageSquare, Trash2, FileSignature } from 'lucide-react';
+import { Edit, Phone, MapPin, ExternalLink, Check, Eye, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, MessageSquare, Trash2, FileSignature, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 
@@ -17,6 +17,7 @@ export function ApartmentDetails() {
     const [preferences, setPreferences] = useState<UserPreferences | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+    const [isEditingReqs, setIsEditingReqs] = useState(false);
     const [activeNoteField, setActiveNoteField] = useState<string | null>(null);
     const [noteText, setNoteText] = useState('');
     const isMounted = useRef(true);
@@ -291,6 +292,91 @@ export function ApartmentDetails() {
         return positiveFields;
     };
 
+    // ... existing imports
+
+    // New internal component or just inline JSX for the modal
+    const QuickEditRequirements = ({ onClose }: { onClose: () => void }) => {
+        const [tempPrefs, setTempPrefs] = useState<UserPreferences>(preferences || {});
+
+        const toggle = (key: keyof UserPreferences) => {
+            setTempPrefs(prev => ({ ...prev, [key]: !prev[key] }));
+        };
+
+        const save = async () => {
+            if (!user) return;
+            try {
+                await updateDoc(doc(db, 'users', user.uid), { preferences: tempPrefs });
+                toast.success('הדרישות עודכנו');
+                onClose();
+            } catch (error) {
+                console.error(error);
+                toast.error(HE.common.error);
+            }
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+                <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                        <h3 className="font-bold text-lg">עריכת דרישות חובה</h3>
+                        <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full">
+                            <X size={20} />
+                        </button>
+                    </div>
+                    <div className="p-4 space-y-3">
+                        <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
+                            <span className="font-medium text-gray-700">{HE.apartment.elevator}</span>
+                            <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveElevator ? "bg-blue-600" : "bg-gray-200")}>
+                                <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveElevator ? "translate-x-[-1.25rem]" : "translate-x-0")} />
+                            </div>
+                            <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveElevator || false} onChange={() => toggle('mustHaveElevator')} />
+                        </label>
+                        <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
+                            <span className="font-medium text-gray-700">חניה</span>
+                            <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveParking ? "bg-blue-600" : "bg-gray-200")}>
+                                <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveParking ? "translate-x-[-1.25rem]" : "translate-x-0")} />
+                            </div>
+                            <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveParking || false} onChange={() => toggle('mustHaveParking')} />
+                        </label>
+                        <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
+                            <span className="font-medium text-gray-700">מרפסת</span>
+                            <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveBalcony ? "bg-blue-600" : "bg-gray-200")}>
+                                <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveBalcony ? "translate-x-[-1.25rem]" : "translate-x-0")} />
+                            </div>
+                            <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveBalcony || false} onChange={() => toggle('mustHaveBalcony')} />
+                        </label>
+                        <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
+                            <span className="font-medium text-gray-700">ממ״ד / תמ״א</span>
+                            <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveMamad ? "bg-blue-600" : "bg-gray-200")}>
+                                <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveMamad ? "translate-x-[-1.25rem]" : "translate-x-0")} />
+                            </div>
+                            <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveMamad || false} onChange={() => toggle('mustHaveMamad')} />
+                        </label>
+                        <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
+                            <span className="font-medium text-gray-700">מזגן</span>
+                            <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveAC ? "bg-blue-600" : "bg-gray-200")}>
+                                <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveAC ? "translate-x-[-1.25rem]" : "translate-x-0")} />
+                            </div>
+                            <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveAC || false} onChange={() => toggle('mustHaveAC')} />
+                        </label>
+                        <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
+                            <span className="font-medium text-gray-700">{HE.apartment.pets}</span>
+                            <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHavePets ? "bg-blue-600" : "bg-gray-200")}>
+                                <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHavePets ? "translate-x-[-1.25rem]" : "translate-x-0")} />
+                            </div>
+                            <input type="checkbox" className="hidden" checked={tempPrefs.mustHavePets || false} onChange={() => toggle('mustHavePets')} />
+                        </label>
+                    </div>
+                    <div className="p-4 border-t bg-gray-50">
+                        <button onClick={save} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">
+                            שמור שינויים
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="pb-20">
             {/* Header / Hero */}
@@ -308,6 +394,16 @@ export function ApartmentDetails() {
                     <MapPin size={16} className="ml-1" />
                     {apartment.neighborhood}
                 </div>
+
+                {/* Last Update Info */}
+                {apartment.lastUpdatedByName && (
+                    <div className="text-xs text-gray-400 mb-4 flex items-center gap-1">
+                        <span>עודכן לאחרונה ע"י {apartment.lastUpdatedByName}</span>
+                        {apartment.updatedAt?.seconds && (
+                            <span>• {new Date(apartment.updatedAt.seconds * 1000).toLocaleDateString('he-IL')}</span>
+                        )}
+                    </div>
+                )}
 
                 {/* Summary Accordion */}
                 <div className="mb-4 border rounded-xl overflow-hidden">
@@ -338,38 +434,45 @@ export function ApartmentDetails() {
                     )}
                 </div>
 
-                {/* Match Status Badge ... (same as before) */}
+                {/* Match Status Badge - Compact */}
                 {preferences && (
                     <div className={clsx(
-                        "mb-4 p-3 rounded-xl border flex items-start gap-3",
+                        "mb-2 p-2 rounded-xl border flex items-center gap-2", // Reduced padding & margin, align center
                         isMatch ? "bg-green-50 border-green-100 text-green-800" : "bg-red-50 border-red-100 text-red-800"
                     )}>
                         {isMatch ? (
-                            <CheckCircle size={20} className="mt-0.5 flex-shrink-0" />
+                            <CheckCircle size={18} className="flex-shrink-0" /> // Smaller icon
                         ) : (
-                            <AlertTriangle size={20} className="mt-0.5 flex-shrink-0" />
+                            <AlertTriangle size={18} className="flex-shrink-0" />
                         )}
-                        <div>
-                            <div className="font-bold text-sm">
+                        <div className="flex-1 min-w-0">
+                            <div className="font-bold text-sm flex items-center gap-2">
                                 {isMatch ? HE.settings.match : HE.settings.mismatch}
+                                {!isMatch && (
+                                    <span className="text-xs font-normal opacity-90 truncate">
+                                        ({missingReqs.join(', ')})
+                                    </span>
+                                )}
                             </div>
-                            {!isMatch && (
-                                <div className="text-xs mt-1 opacity-90">
-                                    {HE.settings.missing} {missingReqs.join(', ')}
-                                </div>
-                            )}
                         </div>
+                        <button
+                            onClick={() => setIsEditingReqs(true)}
+                            className="p-1 hover:bg-black/5 rounded-full transition-colors flex-shrink-0"
+                            title="ערוך דרישות"
+                        >
+                            <Edit size={14} />
+                        </button>
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="bg-gray-50 p-3 rounded-xl text-center">
+                <div className="grid grid-cols-2 gap-3 mt-2"> {/* Reduced gap & margin */}
+                    <div className="bg-gray-50 p-2 rounded-xl text-center"> {/* Reduced padding */}
                         <span className="block text-gray-500 text-xs">{HE.apartment.price}</span>
                         <span className="text-lg font-bold text-gray-900">{apartment.price.toLocaleString()} ₪</span>
                     </div>
                     {apartment.link && (
-                        <a href={apartment.link} target="_blank" rel="noopener noreferrer" className="bg-blue-50 p-3 rounded-xl text-center flex flex-col items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors">
-                            <ExternalLink size={20} className="mb-1" />
+                        <a href={apartment.link} target="_blank" rel="noopener noreferrer" className="bg-blue-50 p-2 rounded-xl text-center flex flex-col items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors">
+                            <ExternalLink size={18} className="mb-0.5" />
                             <span className="text-xs font-medium">{HE.apartment.link}</span>
                         </a>
                     )}
@@ -378,18 +481,16 @@ export function ApartmentDetails() {
 
             {/* Phases */}
             <div className="p-4 space-y-4">
-                {/* Phase 1: Scouting */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
-                        <Eye className="text-blue-500" size={20} />
-                        <h2 className="font-bold text-gray-800">{HE.apartment.phases?.scouting || 'פרטים יבשים'}</h2>
-                    </div>
-                    {apartment.notes ? (
+                {/* Phase 1: Scouting (ONLY SHOW IF NOTES EXIST) */}
+                {apartment.notes && (
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
+                            <Eye className="text-blue-500" size={18} />
+                            <h2 className="font-bold text-gray-800 text-sm">{HE.apartment.phases?.scouting || 'פרטים יבשים'}</h2>
+                        </div>
                         <p className="text-gray-600 text-sm whitespace-pre-wrap">{apartment.notes}</p>
-                    ) : (
-                        <p className="text-gray-400 text-sm italic">אין הערות נוספות</p>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Phase 2: Phone Check */}
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -447,6 +548,9 @@ export function ApartmentDetails() {
                     </div>
                 </div>
             </div>
+
+            {/* Quick Edit Modal */}
+            {isEditingReqs && <QuickEditRequirements onClose={() => setIsEditingReqs(false)} />}
         </div>
     );
 }
