@@ -1,11 +1,13 @@
-import { LogOut, User as UserIcon, Globe, Settings, Users, Trash2 } from 'lucide-react';
+import { LogOut, User as UserIcon, Globe, Settings, Users, Trash2, Briefcase } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useGroup } from '../../context/GroupContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 export function Navbar() {
     const { logout, user } = useAuth();
+    const { activeGroup } = useGroup();
     const { toggleLanguage } = useLanguage();
     const { t } = useTranslation();
 
@@ -23,10 +25,18 @@ export function Navbar() {
                         </Link>
                     ) : null}
 
-                    {/* Logo / App Name */}
-                    <Link to="/" className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
-                        {t('nav.appName')}
-                    </Link>
+                    {/* Logo / App Name & Context Badge */}
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+                        <Link to="/" className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
+                            {t('nav.appName')}
+                        </Link>
+                        {user && (
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 flex items-center gap-1 w-fit">
+                                <Briefcase size={10} />
+                                {activeGroup ? activeGroup.name : (t('agentMode.personalWorkspace') || "Personal")}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Actions */}

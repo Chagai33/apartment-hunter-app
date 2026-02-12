@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, onSnapshot, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useAuth } from '../../../context/AuthContext';
+import { useGroup } from '../../../context/GroupContext';
 import { Apartment } from '../../../types';
 import { ApartmentCard } from './ApartmentCard';
 import { useTranslation } from 'react-i18next';
@@ -12,42 +13,35 @@ import { EmptyState } from './EmptyState'; // Assuming this exists or will be cr
 
 export function ApartmentList() {
     const { user } = useAuth();
+    const { activeGroupId, loading: groupLoading } = useGroup(); // Use Context
     const { t } = useTranslation();
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [loading, setLoading] = useState(true);
-    const [userGroupId, setUserGroupId] = useState<string | null>(null);
 
-    // 1. Listen for User Profile Changes (to get groupId real-time)
+    // 2. Listen for Apartments based on activeGroupId or userId
     useEffect(() => {
-        if (!user) return;
-
-        const unsubUser = onSnapshot(doc(db, 'users', user.uid), (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                setUserGroupId(data.groupId || null);
-            }
-        });
-
-        return () => unsubUser();
-    }, [user]);
-
-    // 2. Listen for Apartments based on groupId or userId
-    useEffect(() => {
-        if (!user) return;
+        // Strict check: Wait for Auth AND Group Context to be ready
+        if (!user || groupLoading) {
+            return;
+        }
         setLoading(true);
 
         // Query logic:
         let q;
 
-        if (userGroupId) {
-            // Group mode: Show apartments belonging to the group
+        if (activeGroupId) {
+            // Group mode: Show apartments belonging to the active group
             q = query(
                 collection(db, 'apartments'),
-                where('groupId', '==', userGroupId),
+                where('groupId', '==', activeGroupId),
                 orderBy('createdAt', 'desc')
             );
         } else {
-            // Private mode: Show personal apartments
+            // Private mode: Show personal apartments (where no groupId is set OR userId matches)
+            // Note: If we want strictly private, we might filter where groupId == null.
+            // But for now, showing all created by user is a safe fallback, 
+            // though ideally we separate "My Private List" from "Group List".
+            // Let's stick to: If no group selected, show mine.
             q = query(
                 collection(db, 'apartments'),
                 where('userId', '==', user.uid),
@@ -83,7 +77,7 @@ export function ApartmentList() {
             unsubscribe();
             clearTimeout(timeoutId);
         };
-    }, [user, userGroupId]);
+    }, [user, activeGroupId, groupLoading]);
 
     if (loading) {
         return (

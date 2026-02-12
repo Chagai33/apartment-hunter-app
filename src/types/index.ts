@@ -126,9 +126,19 @@ export interface UserProfile {
     groupId?: string;
 }
 
+export type GroupMemberRole = 'owner' | 'editor' | 'viewer';
+
+export interface GroupMembership {
+    groupId: string;
+    groupName: string;
+    role: GroupMemberRole;
+    joinedAt: any;
+}
+
 export interface Group {
     id: string;
-    memberIds: string[];
+    memberIds: string[]; // Kept for backward compatibility / simple queries
+    members?: Record<string, { role: GroupMemberRole; joinedAt: any }>; // New Role-based map
     name?: string;
     inviteCode: string;
     createdAt: any;

@@ -136,25 +136,34 @@
         "copy": "העתק",
         "copied": "הועתק!",
         "noGroup": "אתה לא חבר באף קבוצה כרגע.",
+        "createSubtitle": "צור קבוצה חדשה והזמן את השותפים שלך",
+        "defaultGroupName": "הקבוצה שלי",
+        "groupNamePlaceholder": "שם הקבוצה (לדוגמה: משפחת כהן)",
+        "setDefault": "הגדר כברירת מחדל",
+        "confirmDelete": "האם אתה בטוח שברצונך למחוק את הקבוצה? כל הדירות שבה יועברו לסל המחזור.",
+        "deleted": "הקבוצה נמחקה",
         "errors": {
             "invalidCode": "קוד לא תקין או שהקבוצה לא קיימת",
             "alreadyMember": "אתה כבר חבר בקבוצה הזו",
             "createFailed": "יצירת הקבוצה נכשלה",
             "joinFailed": "ההצטרפות לקבוצה נכשלה",
-            "timeout": "הפעולה נמשכת זמן רב מדי, נסה שוב"
+            "timeout": "הפעולה נמשכת זמן רב מדי, נסה שוב",
+            "missingName": "נא להזין שם לקבוצה"
+        }
+    },
+    "agentMode": {
+        "dashboardTitle": "לוח בקרת סוכן",
+        "switchGroup": "החלף לקוח / קבוצה",
+        "createClientGroup": "צור קבוצת לקוח חדשה",
+        "activeClient": "לקוח פעיל:",
+        "roles": {
+            "owner": "מנהל",
+            "editor": "עורך",
+            "viewer": "צופה בלבד"
         },
-        "confirmLeave": "האם אתה בטוח שברצונך לעזוב את הקבוצה?",
-        "leaveModal": {
-            "title": "עזיבת קבוצה",
-            "body": "שים לב: בעזיבת הקבוצה, תאבד גישה לכל הדירות שנוספו על ידי חברי הקבוצה האחרים. הדירות שאתה הוספת יישארו ברשימה שלך.",
-            "confirm": "עזוב קבוצה",
-            "cancel": "ביטול"
-        },
-        "leaveSuccess": "עזבת את הקבוצה",
-        "joinSuccess": "הצטרפת לקבוצה בהצלחה!",
-        "backToApartments": "חזרה לדירות",
-        "createSubtitle": "צור קבוצה חדשה והזמן את השותפים שלך",
-        "defaultGroupName": "הקבוצה שלי"
+        "noGroups": "אין קבוצות מחוברות",
+        "manage": "נהל קבוצות",
+        "personalWorkspace": "מרחב אישי (פרטי)"
     },
     "apartment": {
         "addNew": "הוסף דירה חדשה",

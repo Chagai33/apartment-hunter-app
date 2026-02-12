@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { useGroup } from '../../../context/GroupContext';
 import { doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useForm } from 'react-hook-form';
@@ -13,6 +14,7 @@ export function ApartmentForm() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { activeGroupId } = useGroup(); // Use Context
     const { t } = useTranslation();
 
     // "loading" for submission, "fetching" for initial data load
@@ -81,17 +83,6 @@ export function ApartmentForm() {
         setSubmitting(true);
 
         try {
-            // Get user's current group ID
-            let groupId = null;
-            try {
-                const userSnap = await getDoc(doc(db, 'users', user.uid));
-                if (userSnap.exists()) {
-                    groupId = userSnap.data().groupId || null;
-                }
-            } catch (e) {
-                console.error("Error fetching user group", e);
-            }
-
             const timestamp = serverTimestamp();
             const userInfo = {
                 lastUpdatedBy: user.uid,
@@ -111,19 +102,18 @@ export function ApartmentForm() {
                 toast.success(t('apartment.updateSuccess'));
             } else {
                 // Create new
-                // For new apartments, we set createdBy AND lastUpdatedBy
                 const newApartmentData = {
                     ...data,
                     price: Number(data.price),
                     rooms: Number(data.rooms),
                     userId: user.uid,
-                    groupId: groupId,
+                    groupId: activeGroupId || null, // Use activeGroupId from context
                     status: 'new',
                     createdAt: timestamp,
                     createdBy: user.uid,
                     createdByName: user.displayName || user.email || 'Unknown',
-                    ...userInfo, // spread again strictly for safety, though redundant with above
-                    // Init flags (default false if undefined, but form should handle this via register)
+                    ...userInfo,
+                    // Init flags
                     elevator: data.elevator || false,
                     parking: data.parking || false,
                     balcony: data.balcony || false,
@@ -131,7 +121,7 @@ export function ApartmentForm() {
                     tama38: data.tama38 || false,
                     pets: data.pets || false,
                     furnished: data.furnished || false,
-                    brokerFee: false, // Not in form yet
+                    brokerFee: false,
                 };
                 await addDoc(collection(db, 'apartments'), newApartmentData);
                 toast.success(t('apartment.addSuccess'));

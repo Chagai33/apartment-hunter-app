@@ -136,13 +136,12 @@
         "copy": "Copy",
         "copied": "Copied!",
         "noGroup": "You are not in a group yet.",
-        "errors": {
-            "invalidCode": "Invalid code or group does not exist",
-            "alreadyMember": "You are already a member of this group",
-            "createFailed": "Failed to create group",
-            "joinFailed": "Failed to join group",
-            "timeout": "Operation timed out, please try again"
-        },
+        "createSubtitle": "Create a new group and invite your partners",
+        "defaultGroupName": "My Group",
+        "groupNamePlaceholder": "Group Name (e.g. Cohen Family)",
+        "setDefault": "Set as Default",
+        "confirmDelete": "Are you sure you want to delete this group? All apartments will be moved to trash.",
+        "deleted": "Group deleted",
         "confirmLeave": "Are you sure you want to leave the group?",
         "leaveModal": {
             "title": "Leave Group",
@@ -153,8 +152,14 @@
         "leaveSuccess": "You have left the group",
         "joinSuccess": "Successfully joined the group!",
         "backToApartments": "Back to Apartments",
-        "createSubtitle": "Create a new group and invite your partners",
-        "defaultGroupName": "My Group"
+        "errors": {
+            "invalidCode": "Invalid code or group does not exist",
+            "alreadyMember": "You are already a member of this group",
+            "createFailed": "Failed to create group",
+            "joinFailed": "Failed to join group",
+            "timeout": "Operation timed out, please try again",
+            "missingName": "Please enter a group name"
+        }
     },
     "apartment": {
         "addNew": "Add New Apartment",

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { GroupProvider } from './context/GroupContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AppShell } from './components/layout/AppShell';
 import { LoginPage } from './components/features/auth/LoginPage';
@@ -32,50 +33,52 @@ export default function App() {
         <BrowserRouter>
             <LanguageProvider>
                 <AuthProvider>
-                    <AppShell>
-                        <Routes>
-                            <Route path="/login" element={<LoginPage />} />
-                            <Route path="/" element={<LandingPage />} />
-                            <Route path="/dashboard" element={
-                                <AuthGuard>
-                                    <ApartmentList />
-                                </AuthGuard>
-                            } />
-                            <Route path="/add" element={
-                                <AuthGuard>
-                                    <ApartmentForm />
-                                </AuthGuard>
-                            } />
-                            <Route path="/apartment/:id" element={
-                                <AuthGuard>
-                                    <ApartmentDetails />
-                                </AuthGuard>
-                            } />
-                            <Route path="/edit/:id" element={
-                                <AuthGuard>
-                                    <ApartmentForm />
-                                </AuthGuard>
-                            } />
-                            <Route path="/trash" element={
-                                <AuthGuard>
-                                    <ApartmentTrash />
-                                </AuthGuard>
-                            } />
-                            <Route path="/settings" element={
-                                <AuthGuard>
-                                    <PreferencesForm />
-                                </AuthGuard>
-                            } />
-                            <Route path="/groups" element={
-                                <AuthGuard>
-                                    <GroupManagement />
-                                </AuthGuard>
-                            } />
-                            <Route path="/privacy" element={<PrivacyPolicy />} />
-                            <Route path="/terms" element={<TermsOfService />} />
-                            <Route path="/accessibility" element={<AccessibilityStatement />} />
-                        </Routes>
-                    </AppShell>
+                    <GroupProvider>
+                        <AppShell>
+                            <Routes>
+                                <Route path="/login" element={<LoginPage />} />
+                                <Route path="/" element={<LandingPage />} />
+                                <Route path="/dashboard" element={
+                                    <AuthGuard>
+                                        <ApartmentList />
+                                    </AuthGuard>
+                                } />
+                                <Route path="/add" element={
+                                    <AuthGuard>
+                                        <ApartmentForm />
+                                    </AuthGuard>
+                                } />
+                                <Route path="/apartment/:id" element={
+                                    <AuthGuard>
+                                        <ApartmentDetails />
+                                    </AuthGuard>
+                                } />
+                                <Route path="/edit/:id" element={
+                                    <AuthGuard>
+                                        <ApartmentForm />
+                                    </AuthGuard>
+                                } />
+                                <Route path="/trash" element={
+                                    <AuthGuard>
+                                        <ApartmentTrash />
+                                    </AuthGuard>
+                                } />
+                                <Route path="/settings" element={
+                                    <AuthGuard>
+                                        <PreferencesForm />
+                                    </AuthGuard>
+                                } />
+                                <Route path="/groups" element={
+                                    <AuthGuard>
+                                        <GroupManagement />
+                                    </AuthGuard>
+                                } />
+                                <Route path="/privacy" element={<PrivacyPolicy />} />
+                                <Route path="/terms" element={<TermsOfService />} />
+                                <Route path="/accessibility" element={<AccessibilityStatement />} />
+                            </Routes>
+                        </AppShell>
+                    </GroupProvider>
                 </AuthProvider>
             </LanguageProvider>
         </BrowserRouter>
