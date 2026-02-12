@@ -161,8 +161,10 @@ export function GroupManagement() {
         }
     };
 
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+
     const leaveGroup = async () => {
-        if (!confirm(t('groups.confirmLeave'))) return;
+        // if (!confirm(t('groups.confirmLeave'))) return; // Replaced with modal
         if (!user || !currentGroup) return;
 
         try {
@@ -173,6 +175,7 @@ export function GroupManagement() {
             await updateDoc(doc(db, 'users', user.uid), { groupId: null });
 
             setCurrentGroup(null);
+            setIsLeaveModalOpen(false);
             toast.success(t('groups.leaveSuccess'));
         } catch (error) {
             console.error(error);
@@ -208,7 +211,7 @@ export function GroupManagement() {
                     </div>
 
                     <button
-                        onClick={leaveGroup}
+                        onClick={() => setIsLeaveModalOpen(true)}
                         className="text-red-500 text-sm hover:bg-red-50 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 mx-auto"
                     >
                         <LogOut size={16} />
@@ -221,6 +224,37 @@ export function GroupManagement() {
                         {t('groups.backToApartments')} {isRtl ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
                     </Link>
                 </div>
+
+                {/* Custom Leave Modal */}
+                {isLeaveModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setIsLeaveModalOpen(false)}>
+                        <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="p-6 text-center">
+                                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <LogOut size={24} />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">{t('groups.leaveModal.title')}</h3>
+                                <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                                    {t('groups.leaveModal.body')}
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setIsLeaveModalOpen(false)}
+                                        className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                                    >
+                                        {t('groups.leaveModal.cancel')}
+                                    </button>
+                                    <button
+                                        onClick={leaveGroup}
+                                        className="flex-1 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
+                                    >
+                                        {t('groups.leaveModal.confirm')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }

@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
 
     const isLanding = location.pathname === '/';
-    const showBackButton = location.pathname !== '/' && location.pathname !== '/login';
+    const showBackButton = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/dashboard';
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
