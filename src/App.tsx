@@ -14,6 +14,7 @@ import { GroupManagement } from './components/features/groups/GroupManagement';
 import { PrivacyPolicy } from './components/features/legal/PrivacyPolicy';
 import { TermsOfService } from './components/features/legal/TermsOfService';
 import { AccessibilityStatement } from './components/features/legal/AccessibilityStatement';
+import { WorkspaceSettings } from './components/features/groups/WorkspaceSettings';
 
 
 import { useTranslation } from 'react-i18next'; // Add import
@@ -59,13 +60,15 @@ export default function App() {
                                     </AuthGuard>
                                 } />
                                 <Route path="/trash" element={
-                                    <AuthGuard>
-                                        <ApartmentTrash />
-                                    </AuthGuard>
+                                    <Navigate to="/workspace-settings" replace />
                                 } />
+
                                 <Route path="/settings" element={
+                                    <Navigate to="/workspace-settings" replace />
+                                } />
+                                <Route path="/workspace-settings" element={
                                     <AuthGuard>
-                                        <PreferencesForm />
+                                        <WorkspaceSettings />
                                     </AuthGuard>
                                 } />
                                 <Route path="/groups" element={

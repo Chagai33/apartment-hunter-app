@@ -17,7 +17,7 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     signInAnonymously: () => Promise<void>;
-    signInWithGoogle: () => Promise<void>;
+    signInWithGoogle: (mode?: 'login' | 'register') => Promise<void>;
     signInWithEmail: (email: string, pass: string) => Promise<void>;
     signUpWithEmail: (email: string, pass: string) => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
@@ -33,26 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user);
-            setLoading(false); // Unblock UI immediately
+            setLoading(false);
 
+            // NOTE: We REMOVED the auto-creation logic here. 
+            // User creation is now explicit in register functions.
             if (user) {
-                // background: ensure user doc exists (upsert)
-                // This avoids 'getDoc' failing when offline
-                try {
-                    const userRef = doc(db, 'users', user.uid);
-                    await setDoc(userRef, {
-                        email: user.email,
-                        lastSeen: serverTimestamp(), // Useful for debug
-                    }, { merge: true });
-
-                    // Note: creation time is only set if doc doesn't exist? 
-                    // merge: true preserves other fields.
-                    // If we want 'createdAt' only on creation, we can't easily do it with simple merge 
-                    // without getDoc, but 'createdAt' isn't critical strictly speaking if we use it for nothing.
-                    // Or we can just set email.
-                } catch (error) {
-                    console.error("BG User Sync Error:", error);
-                }
+                // Optional: Update lastSeen if the user exists
+                // But avoid creating new docs blindly
             }
         });
         return unsubscribe;
@@ -62,9 +49,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await firebaseSignInAnonymously(auth);
     };
 
-    const signInWithGoogle = async () => {
+    // Updated: Accept mode to distinguish Intent
+    const signInWithGoogle = async (mode: 'login' | 'register' = 'login') => {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        // Check if user doc exists
+        const userRef = doc(db, 'users', user.uid);
+
+        // We need to check existence. 
+        // Since we can't use getDoc easily without importing it (and it might fail offline), 
+        // we'll import it or try to set with merge: false if register?
+        // Better: Try to read.
+        // Let's import getDoc at the top first? Or just use what we have.
+        // To be safe and simple:
+
+        // Dynamic import or assume we have db access.
+        // We need 'getDoc' from firebase/firestore
+        const { getDoc } = await import('firebase/firestore');
+        const userSnap = await getDoc(userRef);
+
+        if (mode === 'login') {
+            if (!userSnap.exists()) {
+                // USER NOT REGISTERED
+                await firebaseSignOut(auth); // Cleanup session
+                throw new Error("User not registered");
+            }
+            // Update last seen
+            await setDoc(userRef, { lastSeen: serverTimestamp() }, { merge: true });
+        } else {
+            // REGISTER MODE
+            // If already exists, just login (or warn?) -> usually okay to just login
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    email: user.email,
+                    createdAt: serverTimestamp(),
+                    lastSeen: serverTimestamp(),
+                });
+            }
+        }
     };
 
     const logout = async () => {
@@ -76,7 +100,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const signUpWithEmail = async (email: string, pass: string) => {
-        await createUserWithEmailAndPassword(auth, email, pass);
+        const result = await createUserWithEmailAndPassword(auth, email, pass);
+        // Explicitly create user doc
+        const userRef = doc(db, 'users', result.user.uid);
+        await setDoc(userRef, {
+            email: email,
+            createdAt: serverTimestamp(),
+            lastSeen: serverTimestamp(),
+        });
     };
 
     const resetPassword = async (email: string) => {

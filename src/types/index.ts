@@ -22,6 +22,9 @@ export interface UserPreferences {
     mustHaveMamad?: boolean; // Safe room
     mustHaveTama38?: boolean;
     mustHaveFurnished?: boolean;
+
+    // Custom Must Haves (IDs of checklist templates that are required)
+    customMustHaves?: string[];
 }
 
 export interface User {
@@ -142,4 +145,6 @@ export interface Group {
     createdBy: string;
     members: string[]; // array of userIds
     createdAt: number;
+    preferences?: UserPreferences;
+    checklistTemplates?: CustomChecklistTemplate[];
 }

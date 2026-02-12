@@ -116,16 +116,16 @@ export function GroupProvider({ children }: { children: ReactNode }) {
                 createdAt: serverTimestamp(),
             });
 
-            const newGroup: Group = {
-                id: newGroupRef.id,
-                ...newGroupData,
-            } as Group;
+
 
             console.log("Group created with ID:", newGroupRef.id);
 
-            // Optimistic update
-            setGroups(prev => [...prev, newGroup]);
-            setActiveGroupId(newGroupRef.id);
+            // Optimistic update - REMOVED to avoid duplicate key warning
+            // onSnapshot will handle the update automatically
+            // setGroups(prev => [...prev, newGroup]);
+
+            // Set as active group and persist
+            selectGroup(newGroupRef.id);
 
             return newGroupRef.id;
         } catch (error) {

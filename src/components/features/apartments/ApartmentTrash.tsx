@@ -1,85 +1,106 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, doc, updateDoc, deleteDoc, QuerySnapshot, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useAuth } from '../../../context/AuthContext';
+import { useGroup } from '../../../context/GroupContext';
 import { Apartment } from '../../../types';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, Trash2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-export function ApartmentTrash() {
+export function ApartmentTrash({ embedded }: { embedded?: boolean }) {
     const { user } = useAuth();
+    const { activeGroupId, groups } = useGroup();
     const { t } = useTranslation();
     const [apartments, setApartments] = useState<Apartment[]>([]);
     const [loading, setLoading] = useState(true);
-    const [userGroupId, setUserGroupId] = useState<string | null>(null);
 
-    // 1. Get Group ID
+    // Fetch Deleted Apartments
     useEffect(() => {
-        if (!user) return;
-        const unsubUser = onSnapshot(doc(db, 'users', user.uid), (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                setUserGroupId(data.groupId || null);
-            }
-        });
-        return () => unsubUser();
-    }, [user]);
-
-    // 2. Fetch deleted apartments
-    useEffect(() => {
-        if (!user) return;
-        setLoading(true);
-
-        let q;
-        if (userGroupId) {
-            q = query(
-                collection(db, 'apartments'),
-                where('groupId', '==', userGroupId),
-                orderBy('createdAt', 'desc')
-            );
-        } else {
-            q = query(
-                collection(db, 'apartments'),
-                where('userId', '==', user.uid),
-                orderBy('createdAt', 'desc')
-            );
+        if (!user) {
+            setApartments([]);
+            setLoading(false);
+            return;
         }
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const deleted = snapshot.docs
-                .map(doc => ({ id: doc.id, ...doc.data() } as Apartment))
-                .filter(a => a.deleted === true); // Filter client-side for simplicity
+        setLoading(true);
+        setApartments([]); // Clear previous state to prevent stale data display
 
-            setApartments(deleted);
+        // Strict filtering: If activeGroupId is set, ONLY show that group.
+        // If no activeGroupId (Dashboard), show from all user's groups involved.
+        const groupIds = activeGroupId ? [activeGroupId] : groups.map(g => g.id).slice(0, 10);
+
+        if (groupIds.length === 0) {
+            setApartments([]);
             setLoading(false);
-        }, (error) => {
-            console.error("Error fetching trash:", error);
-            setLoading(false);
-        });
+            return;
+        }
 
-        return () => unsubscribe();
-    }, [user, userGroupId]);
-
-    const handleRestore = async (id: string) => {
         try {
-            await updateDoc(doc(db, 'apartments', id), {
+            // Note: querying with 'in' and '== true' usually requires an index.
+            // If this fails, we might need to fetch all and filter client side or create index.
+            // For now, let's try strict filtering.
+            // Optimization: If index missing, we can fetch by groupId only and filter in memory.
+            // Given the volume of "trash" is likely low, filtering active apartments might be heavy.
+            // Let's rely on Firestore. worst case console will tell us to create index.
+
+            const q = query(
+                collection(db, 'apartments'),
+                where('groupId', 'in', groupIds),
+                where('deleted', '==', true),
+                orderBy('deletedAt', 'desc')
+            );
+
+            const unsubscribe = onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
+                const fetchedApartments: Apartment[] = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+                    id: doc.id,
+                    ...doc.data()
+                } as Apartment))
+                    // Strict client-side filtering to ensure no cross-group contamination
+                    .filter((a: Apartment) => groupIds.includes(a.groupId));
+
+                setApartments(fetchedApartments);
+                setLoading(false);
+            }, (error: any) => {
+                console.error("Error fetching trash:", error);
+
+                // Fallback: fetch without ordering if index issue with compound query
+                if (error.code === 'failed-precondition') {
+                    console.warn("Index missing for Trash query. Fallback to client-side sort/filter if needed.");
+                    setLoading(false);
+                } else {
+                    toast.error(t('common.error'));
+                    setLoading(false);
+                }
+            });
+
+            return () => unsubscribe();
+        } catch (error) {
+            console.error(error);
+            setLoading(false);
+        }
+    }, [user, activeGroupId, groups, t]);
+
+    const handleRestore = async (apartmentId: string) => {
+        try {
+            await updateDoc(doc(db, 'apartments', apartmentId), {
                 deleted: false,
                 deletedAt: null
             });
-            toast.success(t('common.restoreSuccess'));
+            toast.success(t('common.restoreSuccess') || "Items restored");
         } catch (error) {
             console.error(error);
             toast.error(t('common.error'));
         }
     };
 
-    const handlePermanentDelete = async (id: string) => {
-        if (!confirm(t('common.deletePermanentConfirm'))) return;
+    const handlePermanentDelete = async (apartmentId: string) => {
+        if (!confirm(t('common.confirmPermanentDelete') || "Are you sure? This cannot be undone.")) return;
+
         try {
-            await deleteDoc(doc(db, 'apartments', id));
-            toast.success(t('common.deletePermanentSuccess'));
+            await deleteDoc(doc(db, 'apartments', apartmentId));
+            toast.success(t('common.deleteSuccess'));
         } catch (error) {
             console.error(error);
             toast.error(t('common.error'));
@@ -89,13 +110,15 @@ export function ApartmentTrash() {
     if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
 
     return (
-        <div className="p-4 pb-24">
-            <div className="flex items-center gap-3 mb-6">
-                <Link to="/settings" className="p-2 rounded-full hover:bg-gray-100">
-                    <ArrowLeft size={24} />
-                </Link>
-                <h1 className="text-2xl font-bold">{t('common.trash')}</h1>
-            </div>
+        <div className={embedded ? "" : "p-4 pb-24"}>
+            {!embedded && (
+                <div className="flex items-center gap-3 mb-6">
+                    <Link to="/settings" className="p-2 rounded-full hover:bg-gray-100">
+                        <ArrowLeft size={24} />
+                    </Link>
+                    <h1 className="text-2xl font-bold">{t('common.trash')}</h1>
+                </div>
+            )}
 
             {apartments.length === 0 ? (
                 <div className="text-center text-gray-500 mt-10">

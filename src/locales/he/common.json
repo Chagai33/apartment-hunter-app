@@ -21,7 +21,9 @@
         "restoreSuccess": "הדירה שוחזרה בהצלחה",
         "deletePermanentConfirm": "פעולה זו תמחק את הדירה לצמיתות ולא ניתן יהיה לשחזר אותה. להמשיך?",
         "deletePermanentSuccess": "הדירה נמחקה לצמיתות",
-        "saveChanges": "שמור שינויים"
+        "saveChanges": "שמור שינויים",
+        "enable": "הפעל",
+        "active": "פעיל"
     },
     "nav": {
         "appName": "Apartment Hunter",
@@ -119,7 +121,13 @@
             "phone": "טלפוני",
             "visit": "ביקור",
             "signing": "חוזה"
-        }
+        },
+        "addNewQuestion": "הוסף שאלה חדשה",
+        "showOnlyMatches": "הצג התאמות בלבד",
+        "filteringByGroup": "מסנן לפי קבוצה",
+        "customRequirements": "דרישות נוספות",
+        "addNewRequirement": "הוסף דרישה חדשה",
+        "reqPlaceholder": "למשל: חניה מקורה..."
     },
     "groups": {
         "title": "ניהול שותפים",
@@ -135,6 +143,8 @@
         "shareTitle": "שתף את הקוד עם השותף/ה שלך",
         "copy": "העתק",
         "copied": "הועתק!",
+        "shareCode": "שתף קוד",
+        "you": "אתה",
         "noGroup": "אתה לא חבר באף קבוצה כרגע.",
         "createSubtitle": "צור קבוצה חדשה והזמן את השותפים שלך",
         "defaultGroupName": "הקבוצה שלי",
@@ -163,7 +173,7 @@
         },
         "noGroups": "אין קבוצות מחוברות",
         "manage": "נהל קבוצות",
-        "personalWorkspace": "מרחב אישי (פרטי)"
+        "personalWorkspace": "המרחב האישי שלי"
     },
     "apartment": {
         "addNew": "הוסף דירה חדשה",
@@ -217,7 +227,9 @@
         "updateSuccess": "הדירה עודכנה בהצלחה",
         "addSuccess": "הדירה נוספה בהצלחה",
         "mamad": "ממ״ד",
-        "warehouse": "מחסן"
+        "warehouse": "מחסן",
+        "reqAdded": "הדרישה נוספה בהצלחה!",
+        "addQuestion": "הוסף שאלה"
     },
     "gallery": {
         "upload": "העלאת תמונות",
@@ -231,6 +243,7 @@
         "emptySubtitle": "זה הזמן להתחיל לחפש! 🏠",
         "cta": "הוסף דירה ראשונה",
         "welcome": "ברוכים הבאים ל-Apartment Hunter",
+        "subtitle": "ברוך שובך",
         "noGroups": "כדי להתחיל, בוא נוסיף את הדירה הראשונה שלך.",
         "createPersonal": "הוסף דירה ראשונה"
     },

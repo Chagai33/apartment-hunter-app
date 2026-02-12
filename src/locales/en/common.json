@@ -21,7 +21,9 @@
         "restoreSuccess": "Apartment restored successfully",
         "deletePermanentConfirm": "This action will permanently delete the apartment and cannot be undone. Continue?",
         "deletePermanentSuccess": "Apartment permanently deleted",
-        "saveChanges": "Save Changes"
+        "saveChanges": "Save Changes",
+        "enable": "Enable",
+        "active": "Active"
     },
     "nav": {
         "appName": "Apartment Hunter",
@@ -119,7 +121,10 @@
             "phone": "Phone",
             "visit": "Visit",
             "signing": "Contract"
-        }
+        },
+        "addNewQuestion": "Add New Question",
+        "showOnlyMatches": "Show Matches Only",
+        "filteringByGroup": "Filtering by Group"
     },
     "groups": {
         "title": "Partner Management",
@@ -133,6 +138,8 @@
         "leave": "Leave Group",
         "codePlaceholder": "Enter Group Code (e.g., A7X92)",
         "shareTitle": "Share code with your partner",
+        "shareCode": "Share Code",
+        "you": "You",
         "copy": "Copy",
         "copied": "Copied!",
         "noGroup": "You are not in a group yet.",
@@ -213,7 +220,8 @@
         "updateSuccess": "Apartment updated successfully",
         "addSuccess": "Apartment added successfully",
         "mamad": "Safe Room (Mamad)",
-        "warehouse": "Storage"
+        "warehouse": "Storage",
+        "addQuestion": "Add Question"
     },
     "gallery": {
         "upload": "Upload Photos",
@@ -227,6 +235,7 @@
         "emptySubtitle": "Time to start hunting! 🏠",
         "cta": "Add First Apartment",
         "welcome": "Welcome to Apartment Hunter",
+        "subtitle": "Welcome back",
         "noGroups": "To get started, let's add your first apartment.",
         "createPersonal": "Add First Apartment"
     },

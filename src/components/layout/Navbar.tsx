@@ -8,7 +8,7 @@ import { GroupSwitcher } from '../features/groups/GroupSwitcher'; // Import Grou
 
 export function Navbar() {
     const { logout, user } = useAuth();
-    const { activeGroupId } = useGroup();
+    const { activeGroupId, groups } = useGroup();
     const { toggleLanguage } = useLanguage();
     const { t } = useTranslation();
 
@@ -18,7 +18,7 @@ export function Navbar() {
                 <div className="flex items-center gap-3">
                     {user ? (
                         <Link
-                            to="/settings"
+                            to="/workspace-settings"
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                             title={t('nav.settings')}
                         >
@@ -31,7 +31,7 @@ export function Navbar() {
                         <Link to="/" className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
                             {t('nav.appName')}
                         </Link>
-                        {user && <GroupSwitcher />}
+                        {user && groups.length > 1 && <GroupSwitcher />}
                     </div>
                 </div>
 

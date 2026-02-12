@@ -22,11 +22,19 @@ export function LoginPage() {
     const handleGoogleLogin = async () => {
         setLoading(true);
         try {
-            await signInWithGoogle();
+            // Use current mode (login/register) to determine intent
+            // If user is in 'reset' mode, default to 'login' (though button is hidden in reset)
+            const intent = mode === 'register' ? 'register' : 'login';
+            await signInWithGoogle(intent);
             navigate('/dashboard');
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error(t('common.error'));
+            if (error.message === "User not registered") {
+                toast.error("אינך רשום במערכת. הועברת להרשמה.");
+                setMode('register');
+            } else {
+                toast.error(t('common.error'));
+            }
         } finally {
             setLoading(false);
         }
@@ -53,12 +61,13 @@ export function LoginPage() {
         } catch (error: any) {
             console.error(error);
             let msg = t('common.error');
-            if (error.code === 'auth/email-already-in-use') msg = 'המייל כבר קיים במערכת'; // TODO: Add specific error keys
-            if (error.code === 'auth/wrong-password') msg = 'סיסמה שגויה';
-            if (error.code === 'auth/user-not-found') msg = 'משתמש לא נמצא';
-            if (error.code === 'auth/invalid-email') msg = 'כתובת מייל לא תקינה';
-            if (error.code === 'auth/weak-password') msg = 'סיסמה חלשה מדי (מינימום 6 תווים)';
-            if (error.code === 'auth/configuration-not-found') msg = 'יש להפעיל את Email/Password במסוף של Firebase!';
+            if (error.code === 'auth/email-already-in-use') msg = 'המייל כבר קיים במערכת';
+            else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') msg = 'המייל או הסיסמה שגויים';
+            else if (error.code === 'auth/user-not-found') msg = 'משתמש לא נמצא. אנא הירשם.';
+            else if (error.code === 'auth/invalid-email') msg = 'כתובת מייל לא תקינה';
+            else if (error.code === 'auth/weak-password') msg = 'סיסמה חלשה מדי (מינימום 6 תווים)';
+            else if (error.code === 'auth/configuration-not-found') msg = 'תקלת קונפיגורציה ב-Firebase';
+
             toast.error(msg);
         } finally {
             setLoading(false);

@@ -36,14 +36,16 @@ export function ApartmentForm() {
         }
     });
 
-    // Auto-select group if available
+    // Auto-select group if available (Only for new apartments)
     useEffect(() => {
+        if (id) return; // Don't override group for existing apartments
+
         if (activeGroupId) {
             setValue('groupId', activeGroupId);
         } else if (groups.length > 0) {
             setValue('groupId', groups[0].id);
         }
-    }, [activeGroupId, groups, setValue]);
+    }, [activeGroupId, groups, setValue, id]);
 
     useEffect(() => {
         if (!id) return;
