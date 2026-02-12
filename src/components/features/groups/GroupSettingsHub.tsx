@@ -1,14 +1,14 @@
 
 import { useState } from 'react';
-import { useAuth } from '../../../context/AuthContext';
+
 import { useGroup } from '../../../context/GroupContext';
 import { PreferencesForm } from '../preferences/PreferencesForm'; // Reuse existing
-import { GroupManagement } from './GroupManagement'; // We might extract parts instead of full reuse
+
 import { useTranslation } from 'react-i18next';
-import { Settings, Users, CheckSquare, LayoutDashboard } from 'lucide-react';
+import { Settings, Users, LayoutDashboard } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
-import { GroupMembersList } from './GroupMembersList';
+
 
 // We will extract the "Members" part of GroupManagement into a separate component later, 
 // for now let's imagine we have a `GroupMembersSettings` component.

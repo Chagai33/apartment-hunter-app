@@ -12,22 +12,20 @@ import {
     query,
     where,
     getDocs,
-    serverTimestamp,
     onSnapshot,
     documentId,
-    deleteField,
     deleteDoc,
     writeBatch
 } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Users, Copy, Check, LogOut, Plus, ArrowRight, ArrowLeft, Briefcase, Star, Pencil, X, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Users, Copy, Check, LogOut, Plus, Briefcase, Pencil, X, Trash2 } from 'lucide-react';
+
 
 export function GroupManagement() {
     const { user } = useAuth();
-    const { groups, activeGroupId, selectGroup, loading: groupLoading } = useGroup();
-    const { t, i18n } = useTranslation();
+    const { groups, activeGroupId, selectGroup } = useGroup();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
 
     // Derived State
@@ -44,7 +42,7 @@ export function GroupManagement() {
     const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
 
-    const isRtl = i18n.dir() === 'rtl';
+
     const [members, setMembers] = useState<any[]>([]);
 
     // Fetch members details when active group changes

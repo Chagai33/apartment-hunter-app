@@ -5,7 +5,7 @@ import { Apartment, UserPreferences } from '../../../types';
 import { useApartments } from '../../../hooks/useApartments';
 import { ApartmentCard } from './ApartmentCard';
 import { useTranslation } from 'react-i18next';
-import { Plus, Filter, X, Settings } from 'lucide-react';
+import { Plus, Filter, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardStats } from './DashboardStats';
 import { EmptyState } from './EmptyState';
@@ -17,7 +17,7 @@ export function ApartmentList() {
     const { t } = useTranslation();
     const { user } = useAuth();
     const { activeGroupId, groups } = useGroup();
-    const { apartments, loading, error } = useApartments();
+    const { apartments, loading } = useApartments();
 
     const [preferences, setPreferences] = useState<UserPreferences | null>(null);
     const [filterByGroup, setFilterByGroup] = useState(false);

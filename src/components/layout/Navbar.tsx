@@ -1,4 +1,4 @@
-import { LogOut, User as UserIcon, Globe, Settings, Users, Trash2, Briefcase } from 'lucide-react';
+import { LogOut, User as UserIcon, Globe, Settings, Users, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useGroup } from '../../context/GroupContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -8,7 +8,7 @@ import { GroupSwitcher } from '../features/groups/GroupSwitcher'; // Import Grou
 
 export function Navbar() {
     const { logout, user } = useAuth();
-    const { activeGroupId, groups } = useGroup();
+    const { groups } = useGroup();
     const { toggleLanguage } = useLanguage();
     const { t } = useTranslation();
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../../context/AuthContext';
+
 import { useGroup } from '../../../context/GroupContext';
 import { PreferencesForm } from '../preferences/PreferencesForm';
 import { useTranslation } from 'react-i18next';

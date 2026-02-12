@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, MapPin, Calendar, ChevronDown, ChevronUp, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Home, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Apartment, ApartmentStatus, UserPreferences } from '../../../types'; // Added UserPreferences
 import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
@@ -29,7 +28,7 @@ export function ApartmentCard({ apartment, preferences }: { apartment: Apartment
         }).format(date);
     }
 
-    const [isExpanded, setIsExpanded] = useState(false);
+
 
     // Match Logic
     const getMissingRequirements = () => {
@@ -54,16 +53,7 @@ export function ApartmentCard({ apartment, preferences }: { apartment: Apartment
     const isMatch = missingReqs.length === 0;
 
     // Summary Logic (unchanged)
-    const summaryItems: string[] = []; // Re-implementing simplified summary for brevity
-    const booleanFields: { key: keyof Apartment, label: string }[] = [
-        { key: 'elevator', label: t('apartment.elevator') },
-        { key: 'parking', label: t('apartment.parking') },
-        { key: 'balcony', label: t('apartment.balcony') },
-        { key: 'tama38', label: t('apartment.tama38') },
-    ];
-    booleanFields.forEach(({ key, label }) => {
-        if (apartment[key]) summaryItems.push(label);
-    });
+
 
 
     return (

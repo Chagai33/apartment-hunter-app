@@ -24,7 +24,7 @@ export function ApartmentForm() {
     const [fetching, setFetching] = useState(!!id); // Start fetching if we have an ID
 
     // We use Partial<Apartment> for the form values
-    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<Partial<Apartment>>({
+    const { register, handleSubmit, reset, setValue } = useForm<Partial<Apartment>>({
         defaultValues: {
             address: '',
             neighborhood: '',

@@ -12,7 +12,7 @@ export function ChecklistManager() {
     const { user } = useAuth();
     const { activeGroupId } = useGroup();
     const { t } = useTranslation();
-    const [loading, setLoading] = useState(false);
+
     const [checklistTemplates, setChecklistTemplates] = useState<CustomChecklistTemplate[]>([]);
     const [newTemplateLabel, setNewTemplateLabel] = useState('');
     const [newTemplatePhase, setNewTemplatePhase] = useState<'scouting' | 'phone' | 'visit' | 'signing'>('phone');

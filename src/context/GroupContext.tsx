@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { db } from '../lib/firebase';
 import {
@@ -26,7 +26,7 @@ export function GroupProvider({ children }: { children: ReactNode }) {
     const [groups, setGroups] = useState<Group[]>([]);
     const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const hasAttemptedAutoCreation = useRef(false);
+
 
 
 

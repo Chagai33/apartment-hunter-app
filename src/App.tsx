@@ -8,8 +8,8 @@ import { LandingPage } from './components/layout/LandingPage';
 import { ApartmentList } from './components/features/apartments/ApartmentList';
 import { ApartmentForm } from './components/features/apartments/ApartmentForm';
 import { ApartmentDetails } from './components/features/apartments/ApartmentDetails';
-import { ApartmentTrash } from './components/features/apartments/ApartmentTrash';
-import { PreferencesForm } from './components/features/preferences/PreferencesForm';
+
+
 import { GroupManagement } from './components/features/groups/GroupManagement';
 import { PrivacyPolicy } from './components/features/legal/PrivacyPolicy';
 import { TermsOfService } from './components/features/legal/TermsOfService';
