@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Building2, Users, HeartHandshake, ArrowRight, ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
+
 
 export function LandingPage() {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
-    const navigate = useNavigate();
+
     const isRtl = i18n.dir() === 'rtl';
 
     // Removed redirect effect to allow landing page viewing

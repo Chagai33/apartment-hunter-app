@@ -11,6 +11,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     useAccessibility();
     const location = useLocation();
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
+    const isRtl = i18n.dir() === 'rtl';
 
     // Don't show shell on login page only
     if (location.pathname === '/login') {
@@ -24,8 +26,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
     const isLanding = location.pathname === '/';
     const showBackButton = location.pathname !== '/' && location.pathname !== '/login';
-    const { t, i18n } = useTranslation();
-    const isRtl = i18n.dir() === 'rtl';
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
