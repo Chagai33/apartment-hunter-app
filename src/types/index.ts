@@ -26,6 +26,7 @@ export interface UserPreferences {
 
 export interface User {
     uid: string;
+    role?: 'agent' | 'client';
     email: string | null;
     displayName?: string | null;
     photoURL?: string | null;
@@ -40,7 +41,7 @@ export interface User {
 export interface Apartment {
     id: string;
     userId: string; // Owner
-    groupId?: string; // The group this belongs to
+    groupId: string; // The group this belongs to
 
     // Core Info
     address: string;
@@ -60,7 +61,7 @@ export interface Apartment {
     updatedAt: any;
 
     // Tracking
-    createdBy?: string;
+    createdBy: string;
     createdByName?: string;
     lastUpdatedBy?: string;
     lastUpdatedByName?: string;
@@ -137,10 +138,8 @@ export interface GroupMembership {
 
 export interface Group {
     id: string;
-    memberIds: string[]; // Kept for backward compatibility / simple queries
-    members?: Record<string, { role: GroupMemberRole; joinedAt: any }>; // New Role-based map
-    name?: string;
-    inviteCode: string;
-    createdAt: any;
+    name: string;
     createdBy: string;
+    members: string[]; // array of userIds
+    createdAt: number;
 }

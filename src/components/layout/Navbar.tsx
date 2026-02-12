@@ -4,16 +4,17 @@ import { useGroup } from '../../context/GroupContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { GroupSwitcher } from '../features/groups/GroupSwitcher'; // Import GroupSwitcher
 
 export function Navbar() {
     const { logout, user } = useAuth();
-    const { activeGroup } = useGroup();
+    const { activeGroupId } = useGroup();
     const { toggleLanguage } = useLanguage();
     const { t } = useTranslation();
 
     return (
         <nav className="h-16 border-b bg-white sticky top-0 z-50 shadow-sm transition-all">
-            <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div className="w-full max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     {user ? (
                         <Link
@@ -30,12 +31,7 @@ export function Navbar() {
                         <Link to="/" className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
                             {t('nav.appName')}
                         </Link>
-                        {user && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 flex items-center gap-1 w-fit">
-                                <Briefcase size={10} />
-                                {activeGroup ? activeGroup.name : (t('agentMode.personalWorkspace') || "Personal")}
-                            </span>
-                        )}
+                        {user && <GroupSwitcher />}
                     </div>
                 </div>
 

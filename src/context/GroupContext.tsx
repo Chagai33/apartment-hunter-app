@@ -1,155 +1,149 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore'; // Removed getDoc
-import { Group, GroupMembership } from '../types';
+import {
+    collection,
+    query,
+    where,
+    onSnapshot,
+    addDoc,
+    serverTimestamp
+} from 'firebase/firestore';
+import { Group } from '../types';
 
 interface GroupContextType {
+    groups: Group[];
     activeGroupId: string | null;
-    activeGroup: Group | null;
-    myGroups: GroupMembership[];
-    defaultGroupId: string | null; // New
     loading: boolean;
-    switchGroup: (groupId: string | null) => Promise<void>;
-    setDefaultGroup: (groupId: string | null) => Promise<void>;
-    refreshGroup: () => void;
+    selectGroup: (groupId: string | null) => void;
+    createGroup: (name: string, isAuto?: boolean) => Promise<string | undefined>;
 }
 
 const GroupContext = createContext<GroupContextType | null>(null);
 
-export function GroupProvider({ children }: { children: React.ReactNode }) {
+export function GroupProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
+    const [groups, setGroups] = useState<Group[]>([]);
     const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-    const [activeGroup, setActiveGroup] = useState<Group | null>(null);
-    const [myGroups, setMyGroups] = useState<GroupMembership[]>([]);
-    const [defaultGroupId, setDefaultGroupId] = useState<string | null>(null); // New State
     const [loading, setLoading] = useState(true);
+    const hasAttemptedAutoCreation = useRef(false);
 
-    // 1. Listen to User's Memberships (Subcollection) AND User Profile
+
+
     useEffect(() => {
         if (!user) {
-            setMyGroups([]);
-            setActiveGroupId(null);
-            setActiveGroup(null);
-            setDefaultGroupId(null);
+            setGroups([]);
             setLoading(false);
             return;
         }
 
-        // Listen to memberships subcollection
-        const membershipsRef = collection(db, 'users', user.uid, 'memberships');
+        const q = query(
+            collection(db, 'groups'),
+            where('members', 'array-contains', user.uid)
+        );
 
-        const unsubMemberships = onSnapshot(membershipsRef, async (snapshot) => {
-            const groups: GroupMembership[] = snapshot.docs.map(d => ({
-                groupId: d.id, // The doc ID is the group ID
-                ...d.data()
-            } as GroupMembership));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetchedGroups: Group[] = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Group));
 
-            setMyGroups(groups);
-
-            // Self-Healing & Name Sync (omitted for brevity, assume same logic)
-            if (activeGroupId && activeGroup && groups.length > 0) {
-                const currentMem = groups.find(g => g.groupId === activeGroupId);
-                if (currentMem && currentMem.groupName !== activeGroup.name && activeGroup.name) {
-                    updateDoc(doc(db, 'users', user.uid, 'memberships', activeGroupId), {
-                        groupName: activeGroup.name
-                    }).catch(e => console.warn("Failed to update membership group name", e));
-                }
-            }
-
-            // Parse User Profile for Preferences
-            let currentDefaultGroupId = null;
-
-            try {
-                // We need to listen to user profile changes or just fetch once? 
-                // Ideally onSnapshot for user profile too, but let's just fetch here for now inside this effect 
-                // or better: separate effect on user doc.
-                // For simplicity, let's fetch here since memberships change rarely.
-                const userDoc = await import('firebase/firestore').then(mod => mod.getDoc(doc(db, 'users', user.uid)));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    const lastActive = userData.lastActiveGroupId;
-                    currentDefaultGroupId = userData.defaultGroupId || null;
-                    setDefaultGroupId(currentDefaultGroupId);
-
-                    // Logic to set active group:
-                    if (activeGroupId && !groups.find(g => g.groupId === activeGroupId)) {
-                        // Fallback
-                        setActiveGroupId(groups.length > 0 ? groups[0].groupId : null);
-                    } else if (!activeGroupId) {
-                        if (lastActive && groups.find(g => g.groupId === lastActive)) {
-                            setActiveGroupId(lastActive);
-                        } else if (currentDefaultGroupId && groups.find(g => g.groupId === currentDefaultGroupId)) {
-                            setActiveGroupId(currentDefaultGroupId);
-                        } else {
-                            setActiveGroupId(null);
-                        }
-                    }
-                } else {
-                    setActiveGroupId(null);
-                }
-            } catch (e) {
-                // Fallback
-                console.error("Error setting initial group", e);
-                // Force logic
-                if (!activeGroupId && groups.length > 0) setActiveGroupId(groups[0].groupId);
-            }
-
-            // Legacy Migration (omitted for brevity)
-
+            setGroups(fetchedGroups);
             setLoading(false);
-        }, (err) => {
-            console.error("Error fetching memberships:", err);
+
+            // Auto-Selection Logic with Persistence
+            const lastActiveId = localStorage.getItem('lastActiveGroupId');
+
+            // 1. If only one group, force select it (Override persistence to ensure consistency)
+            if (fetchedGroups.length === 1) {
+                const singleGroupId = fetchedGroups[0].id;
+                setActiveGroupId(singleGroupId);
+                localStorage.setItem('lastActiveGroupId', singleGroupId);
+            }
+            // 2. If multiple groups, try to restore last active
+            else if (fetchedGroups.length > 1) {
+                if (lastActiveId && fetchedGroups.some(g => g.id === lastActiveId)) {
+                    setActiveGroupId(lastActiveId);
+                } else {
+                    // Valid last active not found? 
+                    // If we currently have an active group that is still valid, keep it.
+                    // If not, fall back to null (Dashboard).
+                    setActiveGroupId(current => {
+                        if (current && fetchedGroups.some(g => g.id === current)) return current;
+                        return null;
+                    });
+                }
+            } else {
+                setActiveGroupId(null);
+            }
+        }, (error) => {
+            console.error("Group subscription error:", error);
             setLoading(false);
         });
 
-        return () => unsubMemberships();
-    }, [user, activeGroupId]); // Dependency on activeGroupId might cause loops if we aren't careful. 
-    // Ideally we separate "Initial Load" from "Updates".
-    // But this logic is mostly checking "If !activeGroupId".
+        return () => unsubscribe();
+    }, [user]);
 
-    // ... (rest of the file)
-
-    const switchGroup = async (groupId: string | null) => {
-        if (!user) return;
-
-        if (groupId === null || groupId === 'personal') {
-            setActiveGroupId(null);
-            try {
-                await updateDoc(doc(db, 'users', user.uid), { lastActiveGroupId: null });
-            } catch (e) {
-                console.warn("Failed to save last active group", e);
-            }
-            return;
-        }
-
-        if (myGroups.find(g => g.groupId === groupId)) {
-            setActiveGroupId(groupId);
-            try {
-                await updateDoc(doc(db, 'users', user.uid), { lastActiveGroupId: groupId });
-            } catch (e) {
-                console.warn("Failed to save last active group", e);
-            }
+    // Persist active group selection
+    const selectGroup = (groupId: string | null) => {
+        setActiveGroupId(groupId);
+        if (groupId) {
+            localStorage.setItem('lastActiveGroupId', groupId);
+        } else {
+            localStorage.removeItem('lastActiveGroupId');
         }
     };
 
-    const refreshGroup = () => {
-        // No-op for now as onSnapshot handles updates
+    const generateInviteCode = () => {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
     };
 
-    const setDefaultGroup = async (groupId: string | null) => {
-        if (!user) return;
+    const createGroup = async (name: string, isAuto: boolean = false): Promise<string> => {
+        if (!user) throw new Error("User not authenticated.");
+
         try {
-            await updateDoc(doc(db, 'users', user.uid), { defaultGroupId: groupId });
-            setDefaultGroupId(groupId); // Optimistic update
-        } catch (e) {
-            console.error("Failed to set default group", e);
-            throw e;
+            const newGroupData = {
+                name,
+                members: [user.uid],
+                createdBy: user.uid,
+                createdAt: Date.now(), // Use local time for optimistic update
+                inviteCode: generateInviteCode(),
+                isAutoCreated: isAuto,
+            };
+
+            const newGroupRef = await addDoc(collection(db, 'groups'), {
+                ...newGroupData,
+                createdAt: serverTimestamp(),
+            });
+
+            const newGroup: Group = {
+                id: newGroupRef.id,
+                ...newGroupData,
+            } as Group;
+
+            console.log("Group created with ID:", newGroupRef.id);
+
+            // Optimistic update
+            setGroups(prev => [...prev, newGroup]);
+            setActiveGroupId(newGroupRef.id);
+
+            return newGroupRef.id;
+        } catch (error) {
+            console.error("Error creating group:", error);
+            throw error;
         }
+    };
+
+    const contextValue: GroupContextType = {
+        groups,
+        activeGroupId,
+        loading,
+        selectGroup,
+        createGroup,
     };
 
     return (
-        <GroupContext.Provider value={{ activeGroupId, activeGroup, myGroups, defaultGroupId, loading, switchGroup, setDefaultGroup, refreshGroup }}>
+        <GroupContext.Provider value={contextValue}>
             {children}
         </GroupContext.Provider>
     );

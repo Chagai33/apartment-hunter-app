@@ -225,7 +225,10 @@
         "seen": "Seen",
         "emptyTitle": "No apartments added yet",
         "emptySubtitle": "Time to start hunting! 🏠",
-        "cta": "Add First Apartment"
+        "cta": "Add First Apartment",
+        "welcome": "Welcome to Apartment Hunter",
+        "noGroups": "To get started, let's add your first apartment.",
+        "createPersonal": "Add First Apartment"
     },
     "accessibility": {
         "statement": "This app is accessible to all users, following WCAG 2.2 AA standards. Features include semantic HTML, focus management, and ARIA support.",

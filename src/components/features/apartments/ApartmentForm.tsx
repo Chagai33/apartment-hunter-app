@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useGroup } from '../../../context/GroupContext';
-import { doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { useApartments } from '../../../hooks/useApartments';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +15,8 @@ export function ApartmentForm() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { activeGroupId } = useGroup(); // Use Context
+    const { activeGroupId, groups } = useGroup(); // Use Context
+    const { addApartment, updateApartment } = useApartments(); // Get addApartment and updateApartment from the hook
     const { t } = useTranslation();
 
     // "loading" for submission, "fetching" for initial data load
@@ -22,15 +24,26 @@ export function ApartmentForm() {
     const [fetching, setFetching] = useState(!!id); // Start fetching if we have an ID
 
     // We use Partial<Apartment> for the form values
-    const { register, handleSubmit, reset } = useForm<Partial<Apartment>>({
+    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<Partial<Apartment>>({
         defaultValues: {
             address: '',
             neighborhood: '',
             price: 0,
             notes: '',
-            rooms: 0
+            rooms: 0,
+            // Add groupId to defaultValues if activeGroupId is null
+            groupId: activeGroupId || (groups.length > 0 ? groups[0].id : ''),
         }
     });
+
+    // Auto-select group if available
+    useEffect(() => {
+        if (activeGroupId) {
+            setValue('groupId', activeGroupId);
+        } else if (groups.length > 0) {
+            setValue('groupId', groups[0].id);
+        }
+    }, [activeGroupId, groups, setValue]);
 
     useEffect(() => {
         if (!id) return;
@@ -38,6 +51,7 @@ export function ApartmentForm() {
         let isMounted = true;
 
         const loadApartment = async () => {
+            // ... existing load logic
             try {
                 const docRef = doc(db, 'apartments', id);
                 const docSnap = await getDoc(docRef);
@@ -59,7 +73,8 @@ export function ApartmentForm() {
                         tama38: data.tama38,
                         pets: data.pets,
                         furnished: data.furnished,
-                        notes: data.notes
+                        notes: data.notes,
+                        groupId: data.groupId // Keep existing group
                     });
                 }
             } catch (error) {
@@ -83,36 +98,23 @@ export function ApartmentForm() {
         setSubmitting(true);
 
         try {
-            const timestamp = serverTimestamp();
-            const userInfo = {
-                lastUpdatedBy: user.uid,
-                lastUpdatedByName: user.displayName || user.email || 'Unknown',
-                updatedAt: timestamp
-            };
-
             if (id) {
                 // Update existing
-                const docRef = doc(db, 'apartments', id);
-                await updateDoc(docRef, {
+                await updateApartment(id, {
                     ...data,
                     price: Number(data.price),
                     rooms: Number(data.rooms),
-                    ...userInfo
+                    lastUpdatedBy: user.uid,
+                    lastUpdatedByName: user.displayName || user.email || 'Unknown',
                 });
                 toast.success(t('apartment.updateSuccess'));
             } else {
                 // Create new
-                const newApartmentData = {
+                await addApartment({
                     ...data,
                     price: Number(data.price),
                     rooms: Number(data.rooms),
-                    userId: user.uid,
-                    groupId: activeGroupId || null, // Use activeGroupId from context
                     status: 'new',
-                    createdAt: timestamp,
-                    createdBy: user.uid,
-                    createdByName: user.displayName || user.email || 'Unknown',
-                    ...userInfo,
                     // Init flags
                     elevator: data.elevator || false,
                     parking: data.parking || false,
@@ -122,14 +124,17 @@ export function ApartmentForm() {
                     pets: data.pets || false,
                     furnished: data.furnished || false,
                     brokerFee: false,
-                };
-                await addDoc(collection(db, 'apartments'), newApartmentData);
+                    createdByName: user.displayName || user.email || 'Unknown',
+                    lastUpdatedBy: user.uid,
+                    lastUpdatedByName: user.displayName || user.email || 'Unknown',
+                }, data.groupId);
+
                 toast.success(t('apartment.addSuccess'));
             }
 
             // Small delay for UX
             setTimeout(() => {
-                navigate('/');
+                navigate('/dashboard');
             }, 500);
 
         } catch (error) {
@@ -152,6 +157,22 @@ export function ApartmentForm() {
         <div className="p-4 pb-24 max-w-2xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">{id ? t('common.edit') : t('apartment.addNew')}</h1>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+                {!activeGroupId && !id && (
+                    <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.selectGroup', 'Select Group')}</label>
+                        <select
+                            {...register('groupId', { required: true })}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer bg-white"
+                        >
+                            <option value="">{t('common.selectGroupPlaceholder', '-- Select Group --')}</option>
+                            {groups.map(g => (
+                                <option key={g.id} value={g.id}>{g.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 <Input label={t('apartment.address')} {...register('address', { required: true })} />
                 <Input label={t('apartment.neighborhood')} {...register('neighborhood', { required: true })} />
                 <div className="grid grid-cols-2 gap-4">
