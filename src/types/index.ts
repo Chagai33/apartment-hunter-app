@@ -72,6 +72,10 @@ export interface Apartment {
     // Contact
     contactName?: string;
     contactPhone?: string;
+    ownerName?: string;
+    ownerPhone?: string;
+    additionalContactName?: string;
+    additionalPhone?: string;
 
     // Features / Boolean Checks
     elevator?: boolean;

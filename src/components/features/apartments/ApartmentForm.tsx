@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { clsx } from 'clsx';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useGroup } from '../../../context/GroupContext';
@@ -24,7 +25,7 @@ export function ApartmentForm() {
     const [fetching, setFetching] = useState(!!id); // Start fetching if we have an ID
 
     // We use Partial<Apartment> for the form values
-    const { register, handleSubmit, reset, setValue } = useForm<Partial<Apartment>>({
+    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<Partial<Apartment>>({
         defaultValues: {
             address: '',
             neighborhood: '',
@@ -76,7 +77,11 @@ export function ApartmentForm() {
                         pets: data.pets,
                         furnished: data.furnished,
                         notes: data.notes,
-                        groupId: data.groupId // Keep existing group
+                        groupId: data.groupId, // Keep existing group
+                        ownerName: data.ownerName || '',
+                        ownerPhone: data.ownerPhone || '',
+                        additionalContactName: data.additionalContactName || '',
+                        additionalPhone: data.additionalPhone || ''
                     });
                 }
             } catch (error) {
@@ -189,6 +194,67 @@ export function ApartmentForm() {
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                             {...register('rooms')}
                         />
+                    </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-4">
+                    <h3 className="font-bold text-gray-700">{t('apartment.details', 'Contact Details')}</h3>
+
+                    {/* Owner */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input
+                            label={t('apartment.ownerName')}
+                            {...register('ownerName')}
+                            placeholder={t('apartment.ownerName')}
+                        />
+                        <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-700">{t('apartment.ownerPhone')}</label>
+                            <input
+                                type="tel"
+                                dir="ltr"
+                                className={clsx(
+                                    "w-full px-4 py-3 rounded-xl border outline-none transition-all",
+                                    errors.ownerPhone ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-gray-200 focus:border-blue-500 focus:ring-blue-100"
+                                )}
+                                {...register('ownerPhone', {
+                                    pattern: {
+                                        value: /^(?:(?:(\+?972|\(\+?972\)|\+?\(972\))(?:\s|\.|-)?([1-9]\d?))|(0[23489]|05[0-689]|07[78]))(?:\s|\.|-)?([^0\D]\d{2})(?:\s|\.|-)?(\d{4})$/,
+                                        message: t('validation.invalidPhone')
+                                    }
+                                })}
+                                placeholder="050-0000000"
+                            />
+                            {errors.ownerPhone && <span className="text-xs text-red-500">{errors.ownerPhone.message}</span>}
+                        </div>
+                    </div>
+
+                    {/* Additional Contact */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input
+                            label={t('apartment.additionalContactName')}
+                            {...register('additionalContactName')}
+                            placeholder={t('apartment.additionalContactName')}
+                        />
+                        <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-700">{t('apartment.additionalPhone')}</label>
+                            <input
+                                type="tel"
+                                dir="ltr"
+                                className={clsx(
+                                    "w-full px-4 py-3 rounded-xl border outline-none transition-all",
+                                    errors.additionalPhone ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-gray-200 focus:border-blue-500 focus:ring-blue-100"
+                                )}
+                                {...register('additionalPhone', {
+                                    pattern: {
+                                        value: /^(?:(?:(\+?972|\(\+?972\)|\+?\(972\))(?:\s|\.|-)?([1-9]\d?))|(0[23489]|05[0-689]|07[78]))(?:\s|\.|-)?([^0\D]\d{2})(?:\s|\.|-)?(\d{4})$/,
+                                        message: t('validation.invalidPhone')
+                                    }
+                                })}
+                                placeholder="050-0000000"
+                            />
+                            {errors.additionalPhone && <span className="text-xs text-red-500">{errors.additionalPhone.message}</span>}
+                        </div>
                     </div>
                 </div>
 

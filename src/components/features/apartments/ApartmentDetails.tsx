@@ -726,6 +726,43 @@ export function ApartmentDetails() {
                         </a>
                     )}
                 </div>
+
+                {/* Contact Information */}
+                {(apartment.ownerName || apartment.ownerPhone || apartment.additionalContactName || apartment.additionalPhone) && (
+                    <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex flex-col gap-3">
+                        {/* Owner */}
+                        {(apartment.ownerName || apartment.ownerPhone) && (
+                            <div className="flex justify-between items-center">
+                                <div className="flex flex-col">
+                                    <span className="text-xs text-blue-600 font-bold uppercase tracking-wide">{t('apartment.ownerName')}</span>
+                                    <span className="font-medium text-gray-900">{apartment.ownerName || '-'}</span>
+                                </div>
+                                {apartment.ownerPhone && (
+                                    <a href={`tel:${apartment.ownerPhone}`} className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg text-blue-600 font-bold text-sm shadow-sm hover:bg-blue-50 transition-colors">
+                                        <Phone size={14} />
+                                        <span dir="ltr">{apartment.ownerPhone}</span>
+                                    </a>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Additional Contact */}
+                        {(apartment.additionalContactName || apartment.additionalPhone) && (
+                            <div className="flex justify-between items-center pt-2 border-t border-blue-100">
+                                <div className="flex flex-col">
+                                    <span className="text-xs text-blue-600 font-bold uppercase tracking-wide">{t('apartment.additionalContactName')}</span>
+                                    <span className="font-medium text-gray-900">{apartment.additionalContactName || '-'}</span>
+                                </div>
+                                {apartment.additionalPhone && (
+                                    <a href={`tel:${apartment.additionalPhone}`} className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg text-blue-600 font-bold text-sm shadow-sm hover:bg-blue-50 transition-colors">
+                                        <Phone size={14} />
+                                        <span dir="ltr">{apartment.additionalPhone}</span>
+                                    </a>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Phases */}

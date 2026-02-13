@@ -180,6 +180,10 @@
         "details": "פרטים",
         "createdAt": "נוסף בתאריך: ",
         "address": "כתובת / רחוב",
+        "ownerName": "שם בעל הדירה",
+        "ownerPhone": "טלפון בעל הדירה",
+        "additionalContactName": "שם איש קשר נוסף",
+        "additionalPhone": "טלפון נוסף",
         "price": "שכר דירה (₪)",
         "neighborhood": "שכונה",
         "rooms": "מספר חדרים",
@@ -254,5 +258,8 @@
             "aria": "הכרזות לקורא מסך",
             "contrast": "טקסט בניגודיות גבוהה"
         }
+    },
+    "validation": {
+        "invalidPhone": "נא להזין מספר טלפון ישראלי תקין (לדוגמה: 050-1234567)"
     }
 }

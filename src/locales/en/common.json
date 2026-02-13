@@ -173,6 +173,10 @@
         "details": "Details",
         "createdAt": "Added on: ",
         "address": "Address / Street",
+        "ownerName": "Landlord Name",
+        "ownerPhone": "Landlord Phone",
+        "additionalContactName": "Additional Contact Name",
+        "additionalPhone": "Additional Phone",
         "price": "Rent (₪)",
         "neighborhood": "Neighborhood",
         "rooms": "Rooms",
@@ -246,5 +250,8 @@
             "aria": "Screen Reader Announcements",
             "contrast": "High Contrast Text"
         }
+    },
+    "validation": {
+        "invalidPhone": "Please enter a valid Israeli phone number (e.g. 050-1234567)"
     }
 }
