@@ -5,6 +5,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { AppShell } from './components/layout/AppShell';
 import { LoginPage } from './components/features/auth/LoginPage';
 import { LandingPage } from './components/layout/LandingPage';
+import { UserGuide } from './components/layout/UserGuide';
 import { ApartmentList } from './components/features/apartments/ApartmentList';
 import { ApartmentForm } from './components/features/apartments/ApartmentForm';
 import { ApartmentDetails } from './components/features/apartments/ApartmentDetails';
@@ -39,6 +40,7 @@ export default function App() {
                             <Routes>
                                 <Route path="/login" element={<LoginPage />} />
                                 <Route path="/" element={<LandingPage />} />
+                                <Route path="/guide" element={<UserGuide />} />
                                 <Route path="/dashboard" element={
                                     <AuthGuard>
                                         <ApartmentList />

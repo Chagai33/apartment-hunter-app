@@ -50,6 +50,13 @@ export function LandingPage() {
                             {user ? (t('nav.dashboard') || 'ללוח הדירות') : t('landing.ctaStart')}
                             {isRtl ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                         </Link>
+
+                        <Link
+                            to="/guide"
+                            className="inline-flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+                        >
+                            {t('nav.userGuide') || 'User Guide'}
+                        </Link>
                     </div>
                 </section>
 

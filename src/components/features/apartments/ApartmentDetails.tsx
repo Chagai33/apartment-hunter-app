@@ -645,6 +645,46 @@ export function ApartmentDetails() {
                     {apartment.neighborhood}
                 </div>
 
+                {/* Status Selector */}
+                <div className="mb-4">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">{t('apartment.statusLabel', 'Status')}</label>
+                    <div className="relative">
+                        <select
+                            value={apartment.status}
+                            onChange={async (e) => {
+                                if (!apartment || !id) return;
+                                try {
+                                    await updateDoc(doc(db, 'apartments', id), {
+                                        status: e.target.value,
+                                        lastUpdatedBy: user?.uid,
+                                        lastUpdatedByName: user?.displayName || user?.email || 'Unknown',
+                                        updatedAt: serverTimestamp()
+                                    });
+                                    toast.success(t('apartment.updateSuccess'));
+                                } catch (error) {
+                                    console.error(error);
+                                    toast.error(t('common.error'));
+                                }
+                            }}
+                            className={clsx(
+                                "w-full appearance-none px-4 py-3 pr-10 rounded-xl font-bold text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer",
+                                {
+                                    'bg-blue-50 text-blue-800 border-blue-100': apartment.status === 'new',
+                                    'bg-yellow-50 text-yellow-800 border-yellow-100': apartment.status === 'called',
+                                    'bg-green-50 text-green-800 border-green-100': apartment.status === 'visited',
+                                    'bg-gray-50 text-gray-800 border-gray-200 opacity-75': apartment.status === 'rejected',
+                                }
+                            )}
+                        >
+                            <option value="new">{t('apartment.status.new')}</option>
+                            <option value="called">{t('apartment.status.called')}</option>
+                            <option value="visited">{t('apartment.status.visited')}</option>
+                            <option value="rejected">{t('apartment.status.rejected')}</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" size={16} />
+                    </div>
+                </div>
+
                 {/* Last Update Info */}
                 {apartment.lastUpdatedByName && (
                     <div className="text-xs text-gray-400 mb-4 flex items-center gap-1">

@@ -12,6 +12,7 @@
         "add": "הוסף",
         "close": "סגור",
         "search": "חיפוש",
+        "search": "חיפוש",
         "trash": "סל מחזור",
         "restore": "שחזר",
         "deletePermanently": "מחק לצמיתות",
@@ -33,7 +34,8 @@
         "settings": "הגדרות",
         "trash": "סל מחזור",
         "myApartments": "הדירות שלי",
-        "dashboard": "לוח הדירות"
+        "dashboard": "לוח הדירות",
+        "userGuide": "מדריך למשתמש"
     },
     "footer": {
         "developedBy": "פותח ע\"י",

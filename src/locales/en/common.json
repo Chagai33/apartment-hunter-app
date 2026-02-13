@@ -12,6 +12,7 @@
         "add": "Add",
         "close": "Close",
         "search": "Search",
+        "search": "Search",
         "trash": "Trash",
         "restore": "Restore",
         "deletePermanently": "Delete Permanently",
@@ -33,7 +34,8 @@
         "settings": "Settings",
         "trash": "Trash",
         "myApartments": "My Apartments",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "userGuide": "User Guide"
     },
     "footer": {
         "developedBy": "Developed by",
