@@ -169,61 +169,55 @@ export function UserGuide() {
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-gray-900">
-                                {isRtl ? "חלק ב': מדריך למתווכים" : "Part B: For Real Agents"}
+                                {isRtl ? "חלק ב': מדריך למתווכים ואנשי מקצוע" : "Part B: For Real Estate Agents"}
                             </h2>
                             <p className="text-xs text-gray-500">
-                                {isRtl ? "(Agents)" : "(Agents)"}
+                                {isRtl ? "ניהול מתקדם של מספר עסקאות במקביל בשקיפות מלאה מול הלקוח." : "Advanced management of multiple deals in parallel with full client transparency."}
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <div className="p-4 md:p-6 space-y-8">
+                    {/* Step 1: Create Workspace */}
                     <article className="flex gap-4">
                         <div className="flex-shrink-0 w-8 h-8 rounded bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold mt-1">1</div>
                         <div>
-                            <h3 className="text-base font-bold text-gray-900 mb-1">
-                                {isRtl ? 'אסטרטגיית "קבוצה לכל לקוח"' : '"Group per Client" Strategy'}
+                            <h3 className="text-base font-bold text-gray-900 mb-2">
+                                {isRtl ? 'יצירת סביבת עבודה ללקוח חדש' : 'Create a Client Workspace'}
                             </h3>
-                            <div className="text-sm text-gray-600 space-y-1">
-                                <p>{isRtl ? 'במקום לנהל רשימות אקסל, השתמשו במנגנון הקבוצות.' : 'Use groups instead of Excel sheets.'}</p>
-                                <ul className="list-disc list-inside text-xs space-y-1 mt-2 text-gray-500">
-                                    <li>{isRtl ? 'פתחו קבוצה ללקוח והזמינו אותו.' : 'Create a group and invite the client.'}</li>
-                                    <li>{isRtl ? 'הלקוח רואה עבודה בזמן אמת ומגיב מיידית.' : 'Client sees real-time work and reacts instantly.'}</li>
-                                </ul>
+                            <div className="text-sm text-gray-600 space-y-2 leading-relaxed">
+                                <p>{isRtl ? 'כאיש מקצוע, באפשרותך ליצור "סביבת עבודה" (Workspace) ייעודית עבור כל לקוח.' : 'As a professional, you can create a dedicated Workspace for each client.'}</p>
+                                <p>{isRtl ? 'גש לתפריט ניהול הקבוצות ולחץ על "צור קבוצה חדשה". תן לקבוצה את שם הלקוח (לדוגמה: "משפחת כהן - דירת 4 חדרים").' : 'Go to to the Group Management menu and click "Create New Group". Name it after the client (e.g. "Cohen Family - 4 Rooms").'}</p>
                             </div>
                         </div>
                     </article>
 
+                    {/* Step 2: Invite the Client */}
                     <article className="flex gap-4">
                         <div className="flex-shrink-0 w-8 h-8 rounded bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold mt-1">2</div>
                         <div>
-                            <h3 className="text-base font-bold text-gray-900 mb-1">
-                                {isRtl ? 'פרופיל לקוח ומשפך שיווקי' : 'Client Profile & Pipeline'}
+                            <h3 className="text-base font-bold text-gray-900 mb-2">
+                                {isRtl ? 'הזמנת הלקוח לדאשבורד' : 'Invite the Client'}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-2">
-                                {isRtl ? 'הגדירו Preferences ללקוח לסינון מדויק. נהלו את ה-Pipeline בעזרת הסטטוסים:' : 'Set preferences for accurate filtering. Manage pipeline with statuses:'}
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                                {isRtl
+                                    ? 'לאחר פתיחת סביבת העבודה והזנת נכסים פוטנציאליים, שתף ללקוח את קוד ההצטרפות לקבוצה. הלקוח יקבל גישה לצפייה והערות על הנכסים שסיננת עבורו בלבד.'
+                                    : 'Share the group code with your client. The client will gain access to view and comment only on the assets you have curated for them.'}
                             </p>
-                            <div className="flex flex-wrap gap-2">
-                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">New</span>
-                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">Called</span>
-                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">Visited</span>
-                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">Rejected</span>
-                            </div>
                         </div>
                     </article>
 
+                    {/* Step 3: Switch between clients */}
                     <article className="flex gap-4">
                         <div className="flex-shrink-0 w-8 h-8 rounded bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold mt-1">3</div>
                         <div>
-                            <h3 className="text-base font-bold text-gray-900 mb-1">
-                                {isRtl ? 'סטנדרטיזציה (Checklists) וסל מיחזור (Trash)' : 'Standardization & Trash'}
+                            <h3 className="text-base font-bold text-gray-900 mb-2">
+                                {isRtl ? 'מעבר בין לקוחות (Group Switcher)' : 'Switch Between Clients'}
                             </h3>
-                            <div className="text-sm text-gray-600 space-y-2">
-                                <p>{isRtl ? 'צרו שאלות קבועות לשלבי החתימה (Signing) והביקור. זה מונע תקלות.' : 'Create standard questions for signing and visits.'}</p>
-                                <p className="text-xs bg-gray-50 p-2 rounded">
-                                    <strong>Trash:</strong> {isRtl ? 'מחקתם בטעות? שחזרו נכסים בקלות דרך ה-Workspace Settings.' : 'Deleted by mistake? Restore via Workspace Settings.'}
-                                </p>
+                            <div className="text-sm text-gray-600 space-y-2 leading-relaxed">
+                                <p>{isRtl ? 'מנהל מספר לקוחות במקביל? השתמש בתפריט העליון כדי לדלג במהירות בין סביבות העבודה השונות.' : 'Managing multiple clients? Use the top menu to quickly hop between workspaces.'}</p>
+                                <p>{isRtl ? 'כל סביבה מבודדת לחלוטין, כך שתוכל לנהל עשרות נכסים בסדר מופתי וללא בלבול.' : 'Every workspace is completely isolated, allowing you to manage dozens of properties perfectly without mixing data.'}</p>
                             </div>
                         </div>
                     </article>

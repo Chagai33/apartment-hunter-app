@@ -35,7 +35,7 @@ export function LandingPage() {
             <main>
                 {/* Hero Section */}
                 <section className="px-6 pt-12 pb-6 text-center max-w-4xl mx-auto">
-                    <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight leading-tight">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight leading-tight">
                         {t('landing.heroTitle')}
                     </h1>
                     <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -79,6 +79,41 @@ export function LandingPage() {
                                 </p>
                             </div>
                         ))}
+                    </div>
+                </section>
+
+                {/* B2B / Agents Section */}
+                <section className="px-6 py-16 bg-blue-50 border-y border-blue-100">
+                    <div className="max-w-5xl mx-auto text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-blue-900 mb-4">
+                            {t('landing.b2b.title')}
+                        </h2>
+                    </div>
+                    <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 text-right">
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50">
+                            <h3 className="text-lg font-bold text-blue-800 mb-2">
+                                {t('landing.b2b.points.separation.title')}
+                            </h3>
+                            <p className="text-gray-600">
+                                {t('landing.b2b.points.separation.desc')}
+                            </p>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50">
+                            <h3 className="text-lg font-bold text-blue-800 mb-2">
+                                {t('landing.b2b.points.sharing.title')}
+                            </h3>
+                            <p className="text-gray-600">
+                                {t('landing.b2b.points.sharing.desc')}
+                            </p>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50">
+                            <h3 className="text-lg font-bold text-blue-800 mb-2">
+                                {t('landing.b2b.points.switching.title')}
+                            </h3>
+                            <p className="text-gray-600">
+                                {t('landing.b2b.points.switching.desc')}
+                            </p>
+                        </div>
                     </div>
                 </section>
 
