@@ -16,7 +16,7 @@ interface GroupContextType {
     activeGroupId: string | null;
     loading: boolean;
     selectGroup: (groupId: string | null) => void;
-    createGroup: (name: string, isAuto?: boolean) => Promise<string | undefined>;
+    createGroup: (name: string, isAuto?: boolean) => Promise<{ id: string, inviteCode: string }>;
 }
 
 const GroupContext = createContext<GroupContextType | null>(null);
@@ -98,16 +98,17 @@ export function GroupProvider({ children }: { children: ReactNode }) {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     };
 
-    const createGroup = async (name: string, isAuto: boolean = false): Promise<string> => {
+    const createGroup = async (name: string, isAuto: boolean = false): Promise<{ id: string, inviteCode: string }> => {
         if (!user) throw new Error("User not authenticated.");
 
         try {
+            const inviteCode = generateInviteCode();
             const newGroupData = {
                 name,
                 members: [user.uid],
                 createdBy: user.uid,
                 createdAt: Date.now(), // Use local time for optimistic update
-                inviteCode: generateInviteCode(),
+                inviteCode,
                 isAutoCreated: isAuto,
             };
 
@@ -127,7 +128,7 @@ export function GroupProvider({ children }: { children: ReactNode }) {
             // Set as active group and persist
             selectGroup(newGroupRef.id);
 
-            return newGroupRef.id;
+            return { id: newGroupRef.id, inviteCode };
         } catch (error) {
             console.error("Error creating group:", error);
             throw error;

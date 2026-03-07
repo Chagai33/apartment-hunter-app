@@ -3,9 +3,10 @@ export type ApartmentStatus = 'new' | 'called' | 'visited' | 'rejected';
 export interface CustomChecklistTemplate {
     id: string;
     label: string;
-    phase: 'scouting' | 'phone' | 'visit' | 'signing'; // Updated 'scouting' instead of 'phone'/'visit' only, or keep generic?
-    // Let's stick to the existing phases in the app: 'scouting' | 'phone' | 'visit'
+    phase: 'scouting' | 'phone' | 'visit' | 'signing';
 }
+
+export type RequirementState = 'required' | 'excluded' | null;
 
 export interface UserPreferences {
     minRooms?: number;
@@ -13,7 +14,7 @@ export interface UserPreferences {
     minPrice?: number;
     area?: string[];
 
-    // Mandatory requirements (Must Haves)
+    // Mandatory requirements (Must Haves / Dealbreakers)
     mustHaveElevator?: boolean;
     mustHaveParking?: boolean;
     mustHaveBalcony?: boolean;
@@ -23,7 +24,7 @@ export interface UserPreferences {
     mustHaveTama38?: boolean;
     mustHaveFurnished?: boolean;
 
-    // Custom Must Haves (IDs of checklist templates that are required)
+    // Custom Must Haves (Legacy array of IDs that are 'required')
     customMustHaves?: string[];
 }
 
@@ -109,7 +110,6 @@ export interface Apartment {
     // Media
     images: { url: string; path: string }[];
 
-    // Notes
     notes?: string;
     checklistNotes?: Record<string, string>; // key: fieldName, value: note
     customChecks?: Record<string, boolean>; // key: templateId, value: checked

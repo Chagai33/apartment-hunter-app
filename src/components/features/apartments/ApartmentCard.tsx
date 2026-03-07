@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Home, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
-import { Apartment, ApartmentStatus, UserPreferences } from '../../../types'; // Added UserPreferences
+import { Apartment, ApartmentStatus, UserPreferences, CustomChecklistTemplate } from '../../../types';
 import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 import { Timestamp } from 'firebase/firestore';
@@ -12,7 +12,7 @@ const statusColors: Record<ApartmentStatus, string> = {
     rejected: 'bg-gray-100 text-gray-800',
 };
 
-export function ApartmentCard({ apartment, preferences }: { apartment: Apartment, preferences?: UserPreferences | null }) {
+export function ApartmentCard({ apartment, preferences, checklistTemplates }: { apartment: Apartment, preferences?: UserPreferences | null, checklistTemplates?: CustomChecklistTemplate[] }) {
     const { t } = useTranslation();
     const statusLabel = t(`apartment.status.${apartment.status}`);
     const thumbnail = apartment.images?.[0]?.url;
@@ -39,12 +39,25 @@ export function ApartmentCard({ apartment, preferences }: { apartment: Apartment
         if (preferences.mustHaveParking && !apartment.parking) missing.push(t('apartment.parking'));
         if (preferences.mustHaveBalcony && !apartment.balcony) missing.push(t('apartment.balcony'));
         if (preferences.mustHaveAC && !apartment.ac) missing.push(t('apartment.ac'));
-        if (preferences.mustHaveMamad && !apartment.tama38 && !apartment.notes?.includes('ממ"ד')) missing.push('ממ״ד');
+
+        const hasMamad = apartment.tama38 || apartment.notes?.includes('ממ"ד');
+        if (preferences.mustHaveMamad && !hasMamad) missing.push('ממ״ד');
+
         if (preferences.mustHavePets && !apartment.pets) missing.push(t('apartment.pets'));
         if (preferences.mustHaveFurnished && !apartment.furnished) missing.push(t('apartment.furnished'));
 
         if (preferences.maxPrice && apartment.price > preferences.maxPrice) missing.push(`${t('settings.maxPrice')}`);
         if (preferences.minRooms && (apartment.rooms || 0) < preferences.minRooms) missing.push(`${t('settings.minRooms')}`);
+
+        // Custom Requirements Check
+        if (checklistTemplates && preferences.customMustHaves) {
+            preferences.customMustHaves.forEach(templateId => {
+                const template = checklistTemplates.find(t => t.id === templateId);
+                if (template && !apartment.customChecks?.[templateId]) {
+                    missing.push(template.label);
+                }
+            });
+        }
 
         return missing;
     };
@@ -100,13 +113,15 @@ export function ApartmentCard({ apartment, preferences }: { apartment: Apartment
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between mt-2">
-                            <div className="flex gap-1">
-                                {Number(apartment.rooms) > 0 && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{apartment.rooms} {t('apartment.rooms')}</span>}
-                            </div>
+                        <div className="flex flex-col gap-2 mt-2">
+                            <div className="flex items-center justify-between">
+                                <div className="flex gap-1">
+                                    {Number(apartment.rooms) > 0 && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{apartment.rooms} {t('apartment.rooms')}</span>}
+                                </div>
 
-                            <div className="text-xs text-gray-400">
-                                {dateStr}
+                                <div className="text-xs text-gray-400">
+                                    {dateStr}
+                                </div>
                             </div>
                         </div>
                     </div>

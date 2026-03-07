@@ -9,14 +9,59 @@ import { Link, Navigate } from 'react-router-dom';
 import { GroupMembersList } from './GroupMembersList';
 import { ApartmentTrash } from '../apartments/ApartmentTrash';
 import { ChecklistManager } from '../checklists/ChecklistManager';
+import { useAuth } from '../../../context/AuthContext';
+import toast from 'react-hot-toast';
+import { Input } from '../../common/Input';
 
 export function WorkspaceSettings() {
     const { t } = useTranslation();
     const { activeGroupId, groups } = useGroup();
     const activeGroup = groups.find(g => g.id === activeGroupId);
 
-    // Tabs: 'preferences' | 'members' | 'checklist' | 'trash'
-    const [activeTab, setActiveTab] = useState<'preferences' | 'members' | 'checklist' | 'trash'>('preferences');
+    // Tabs: 'preferences' | 'members' | 'checklist' | 'trash' | 'account'
+    const [activeTab, setActiveTab] = useState<'preferences' | 'members' | 'checklist' | 'trash' | 'account'>('preferences');
+    const { user, deleteAccount, reauthenticate } = useAuth();
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Re-auth states
+    const [showReauthModal, setShowReauthModal] = useState(false);
+    const [reauthPassword, setReauthPassword] = useState('');
+    const [isReauthenticating, setIsReauthenticating] = useState(false);
+    const providerId = user?.providerData[0]?.providerId;
+
+    const handleDeleteAccount = async () => {
+        setIsDeleting(true);
+        try {
+            await deleteAccount();
+            toast.success(t('settings.accountDeleted', 'Account deleted successfully'));
+        } catch (error: any) {
+            console.error("Failed to delete account", error);
+            if (error?.code === 'auth/requires-recent-login' || error?.message?.includes('requires-recent-login')) {
+                setShowDeleteModal(false);
+                setShowReauthModal(true);
+            } else {
+                toast.error(t('settings.accountDeleteFailed', 'Failed to delete account. Please try again later.'));
+            }
+            setIsDeleting(false);
+        }
+    };
+
+    const handleReauthAndRetry = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        setIsReauthenticating(true);
+        try {
+            await reauthenticate(reauthPassword);
+            setShowReauthModal(false);
+            setReauthPassword('');
+            // Retry deletion
+            await handleDeleteAccount();
+        } catch (error: any) {
+            console.error(error);
+            toast.error(t('settings.reauthFailed', 'אימות נכשל, אנא ודא שהפרטים נכונים ונסה שוב.'));
+            setIsReauthenticating(false);
+        }
+    };
 
     if (!activeGroupId || !activeGroup) {
         return <Navigate to="/dashboard" replace />;
@@ -56,6 +101,12 @@ export function WorkspaceSettings() {
                     label={t('settings.customChecklist', 'Checklist')}
                 />
                 <TabButton
+                    active={activeTab === 'account'}
+                    onClick={() => setActiveTab('account')}
+                    icon={<Settings size={16} />}
+                    label={t('settings.account', 'Account')}
+                />
+                <TabButton
                     active={activeTab === 'trash'}
                     onClick={() => setActiveTab('trash')}
                     icon={<Trash2 size={16} />}
@@ -84,7 +135,98 @@ export function WorkspaceSettings() {
                         <ApartmentTrash key={activeGroupId || 'dashboard'} embedded={true} />
                     </div>
                 )}
+                {activeTab === 'account' && (
+                    <div className="p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">{t('settings.accountOptions', 'Account Options')}</h2>
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-6">
+                            <h3 className="text-lg font-bold text-red-800 mb-2">{t('settings.dangerZone', 'Danger Zone')}</h3>
+                            <p className="text-sm text-red-600 mb-4">
+                                {t('settings.deleteWarning', 'Once you delete your account, there is no going back. This will permanently erase all your personal data.')}
+                            </p>
+                            <button
+                                onClick={() => setShowDeleteModal(true)}
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition-colors"
+                            >
+                                {t('settings.deleteAccount', 'Delete Account')}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl p-6 text-center">
+                        <h3 className="text-xl font-bold text-red-600 mb-4">{t('settings.confirmDeleteAccountTitle', 'Delete Account?')}</h3>
+                        <p className="text-gray-700 mb-6">
+                            {t('settings.confirmDeleteAccountBody', 'This action cannot be undone. All your personal data and authentication records will be permanently erased.')}
+                        </p>
+                        <div className="flex gap-4 justify-center">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                disabled={isDeleting}
+                                className="px-6 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                {t('common.cancel', 'Cancel')}
+                            </button>
+                            <button
+                                onClick={handleDeleteAccount}
+                                disabled={isDeleting}
+                                className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                            >
+                                {isDeleting ? t('common.loading', 'Deleting...') : t('settings.confirmDelete', 'Yes, Delete My Account')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Re-Authentication Modal */}
+            {showReauthModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl p-6 text-center">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">{t('settings.verifyIdentity', 'Verify Your Identity')}</h3>
+                        <p className="text-gray-600 mb-6">
+                            {t('settings.verifyIdentityBody', 'למען אבטחת המידע שלך, יש לבצע אימות מחדש כדי למחוק את החשבון.')}
+                        </p>
+
+                        <form onSubmit={handleReauthAndRetry} className="flex flex-col gap-4">
+                            {providerId === 'password' && (
+                                <Input
+                                    type="password"
+                                    placeholder={t('settings.enterPassword', 'Enter your password')}
+                                    value={reauthPassword}
+                                    onChange={(e) => setReauthPassword(e.target.value)}
+                                    required
+                                    autoFocus
+                                />
+                            )}
+
+                            <div className="flex gap-4 justify-center mt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowReauthModal(false);
+                                        setReauthPassword('');
+                                    }}
+                                    disabled={isReauthenticating}
+                                    className="px-6 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition-colors"
+                                >
+                                    {t('common.cancel', 'Cancel')}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isReauthenticating || (providerId === 'password' && !reauthPassword)}
+                                    className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                                >
+                                    {isReauthenticating ? t('common.loading', 'Verifying...') : (providerId === 'google.com' ? t('settings.verifyWithGoogle', 'אימות עם גוגל') : t('settings.verifyAndContinue', 'Verify & Delete'))}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

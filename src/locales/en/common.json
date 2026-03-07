@@ -12,7 +12,6 @@
         "add": "Add",
         "close": "Close",
         "search": "Search",
-        "search": "Search",
         "trash": "Trash",
         "restore": "Restore",
         "deletePermanently": "Delete Permanently",
@@ -98,6 +97,11 @@
         "subtitle": "Define must-haves for your apartment to get alerts",
         "saveSuccess": "Settings saved successfully",
         "mustHaves": "Must Haves",
+        "customRequirements": "Custom Requirements",
+        "customRequirementsSubtitle": "These features will sync with the apartment checklist",
+        "addNewRequirement": "Add New Feature",
+        "reqPlaceholder": "e.g., Storage, Renovated, Natural Light...",
+        "reqAdded": "Feature added successfully!",
         "budget": "Budget & Rooms",
         "minRooms": "Min Rooms",
         "maxPrice": "Max Budget",
@@ -126,7 +130,22 @@
         },
         "addNewQuestion": "Add New Question",
         "showOnlyMatches": "Show Matches Only",
-        "filteringByGroup": "Filtering by Group"
+        "filteringByGroup": "Filtering by Group",
+        "groupSettings": "Group Settings"
+    },
+    "agentMode": {
+        "dashboardTitle": "Agent Dashboard",
+        "switchGroup": "Switch Group",
+        "createClientGroup": "Create Client Group",
+        "activeClient": "Active Client",
+        "roles": {
+            "owner": "Owner",
+            "editor": "Editor",
+            "viewer": "Viewer"
+        },
+        "noGroups": "No client groups yet",
+        "manage": "Manage",
+        "personalWorkspace": "Personal Workspace"
     },
     "groups": {
         "title": "Partner Management",
@@ -169,6 +188,30 @@
             "timeout": "Operation timed out, please try again",
             "missingName": "Please enter a group name"
         }
+    },
+    "onboarding": {
+        "welcome": "Welcome to Apartment Hunter! 👋",
+        "subtitle": "How would you like to manage your apartment search?",
+        "optionAloneTitle": "I'm searching alone",
+        "optionAloneDesc": "A personal space just for me. No roommates.",
+        "optionPartnerTitle": "With a partner or roommates",
+        "optionPartnerDesc": "We'll open a shared group and sync our search.",
+        "optionJoinTitle": "I have an invite code",
+        "optionJoinDesc": "Someone sent me a code to join an existing search.",
+        "confirmAlone": "Great! We'll open a personal space for you.",
+        "start": "Let's Start",
+        "groupNameLabel": "What should we call your group?",
+        "groupNamePlaceholder": "e.g., Danny and Dana's Apartments",
+        "createAndStart": "Create Group & Start",
+        "defaultGroupName": "My Search",
+        "errorCreate": "Error creating group, please try again.",
+        "groupCreatedTitle": "Group Created Successfully! 🎉",
+        "shareCodeDesc": "Share this code with your partner so they can join:",
+        "partnerInstructions": "They will need to sign up and choose 'I have an invite code' on this screen.",
+        "shareLaterNote": "Don't worry, you can always find and share this code later in the 'Partner Management' screen.",
+        "copyCode": "Copy Code",
+        "codeCopied": "Copied!",
+        "continueToDashboard": "Continue to Dashboard"
     },
     "apartment": {
         "addNew": "Add New Apartment",
@@ -227,7 +270,10 @@
         "addSuccess": "Apartment added successfully",
         "mamad": "Safe Room (Mamad)",
         "warehouse": "Storage",
-        "addQuestion": "Add Question"
+        "addQuestion": "Add Question",
+        "reqAdded": "Requirement Added",
+        "addAdditionalContact": "Add Additional Contact",
+        "addCustomFeaturePlaceholder": "E.g., Storage, Renovated, Air Directions..."
     },
     "gallery": {
         "upload": "Upload Photos",

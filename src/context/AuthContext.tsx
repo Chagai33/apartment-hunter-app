@@ -8,10 +8,14 @@ import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    deleteUser,
+    reauthenticateWithPopup,
+    reauthenticateWithCredential,
+    EmailAuthProvider
 } from 'firebase/auth';
 import { auth, db } from '../lib/firebase'; // Added db
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
 
 interface AuthContextType {
     user: User | null;
@@ -22,6 +26,8 @@ interface AuthContextType {
     signUpWithEmail: (email: string, pass: string) => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
     logout: () => Promise<void>;
+    deleteAccount: () => Promise<void>;
+    reauthenticate: (password?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -114,8 +120,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await sendPasswordResetEmail(auth, email);
     };
 
+    const deleteAccount = async () => {
+        if (!user) throw new Error("No user logged in");
+
+        // Prevent deleting the Firestore document if Auth account deletion is likely to fail
+        const lastSignInTime = new Date(user.metadata.lastSignInTime || 0).getTime();
+        const now = Date.now();
+        const minutesSinceSignIn = (now - lastSignInTime) / (1000 * 60);
+
+        if (minutesSinceSignIn > 5) {
+            const error = new Error("auth/requires-recent-login");
+            (error as any).code = "auth/requires-recent-login";
+            throw error;
+        }
+
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.exists() ? userSnap.data() : null;
+
+        await deleteDoc(userRef);
+
+        try {
+            await deleteUser(user);
+        } catch (error: any) {
+            // Restore document if auth deletion fails
+            if (error.code === 'auth/requires-recent-login' && userData) {
+                await setDoc(userRef, userData);
+            }
+            throw error;
+        }
+    };
+
+    const reauthenticate = async (password?: string) => {
+        if (!user) throw new Error("No user logged in");
+        const providerId = user.providerData[0]?.providerId;
+
+        if (providerId === 'google.com') {
+            const provider = new GoogleAuthProvider();
+            await reauthenticateWithPopup(user, provider);
+        } else if (providerId === 'password') {
+            if (!password) throw new Error("Password required");
+            if (!user.email) throw new Error("User email not found");
+            const credential = EmailAuthProvider.credential(user.email, password);
+            await reauthenticateWithCredential(user, credential);
+        } else {
+            throw new Error("Unsupported authentication provider");
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, signInAnonymously, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, logout }}>
+        <AuthContext.Provider value={{ user, loading, signInAnonymously, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, logout, deleteAccount, reauthenticate }}>
             {children}
         </AuthContext.Provider>
     );

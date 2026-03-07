@@ -12,7 +12,6 @@
         "add": "הוסף",
         "close": "סגור",
         "search": "חיפוש",
-        "search": "חיפוש",
         "trash": "סל מחזור",
         "restore": "שחזר",
         "deletePermanently": "מחק לצמיתות",
@@ -97,7 +96,13 @@
         "title": "הגדרות חיפוש",
         "subtitle": "הגדר מה חייב להיות בדירה כדי שנדע להתריע לך",
         "saveSuccess": "ההגדרות נשמרו בהצלחה",
+        "groupSettings": "הגדרות מרחב עבודה",
         "mustHaves": "דרישות חובה (Must Haves)",
+        "customRequirements": "דרישות מותאמות אישית",
+        "customRequirementsSubtitle": "מאפיינים אלו יסונכרנו עם צ'קליסט בדיקת הדירה",
+        "addNewRequirement": "הוסף מאפיין חדש",
+        "reqPlaceholder": "למשל: מחסן, משופצת, כיווני אוויר...",
+        "reqAdded": "המאפיין נוסף בהצלחה!",
         "budget": "תקציב וחדרים",
         "minRooms": "מינימום חדרים",
         "maxPrice": "תקציב מקסימלי",
@@ -126,10 +131,7 @@
         },
         "addNewQuestion": "הוסף שאלה חדשה",
         "showOnlyMatches": "הצג התאמות בלבד",
-        "filteringByGroup": "מסנן לפי קבוצה",
-        "customRequirements": "דרישות נוספות",
-        "addNewRequirement": "הוסף דרישה חדשה",
-        "reqPlaceholder": "למשל: חניה מקורה..."
+        "filteringByGroup": "מסנן לפי קבוצה"
     },
     "groups": {
         "title": "ניהול שותפים",
@@ -141,6 +143,16 @@
         "create": "צור קבוצה",
         "join": "הצטרף",
         "leave": "עזוב קבוצה",
+        "confirmLeave": "בטוח שברצונך לעזוב?",
+        "leaveModal": {
+            "title": "עזיבת קבוצה",
+            "body": "האם אתה בטוח שברצונך לעזוב קבוצה זו?",
+            "confirm": "כן, עזוב",
+            "cancel": "ביטול"
+        },
+        "leaveSuccess": "עזבת את הקבוצה בהצלחה",
+        "joinSuccess": "הצטרפת לקבוצה בהצלחה",
+        "backToApartments": "חזרה לדירות",
         "codePlaceholder": "הכנס קוד קבוצה (למשל: A7X92)",
         "shareTitle": "שתף את הקוד עם השותף/ה שלך",
         "copy": "העתק",
@@ -162,6 +174,30 @@
             "timeout": "הפעולה נמשכת זמן רב מדי, נסה שוב",
             "missingName": "נא להזין שם לקבוצה"
         }
+    },
+    "onboarding": {
+        "welcome": "ברוכים הבאים ל-Apartment Hunter! 👋",
+        "subtitle": "איך תעדיפו לנהל את חיפוש הדירה שלכם?",
+        "optionAloneTitle": "אני מחפש לבד",
+        "optionAloneDesc": "מרחב אישי רק בשבילי. בלי שותפים.",
+        "optionPartnerTitle": "עם בן/בת זוג או שותפים",
+        "optionPartnerDesc": "נפתח קבוצה משותפת ונסנכרן את החיפוש.",
+        "optionJoinTitle": "יש לי קוד הזמנה",
+        "optionJoinDesc": "שלחו לי קוד להצטרף לחיפוש קיים.",
+        "confirmAlone": "מעולה! נפתח עבורך מרחב אישי.",
+        "start": "בואו נתחיל",
+        "groupNameLabel": "איך נקרא לקבוצה שלכם?",
+        "groupNamePlaceholder": "לדוגמה: הדירות של דני ודנה",
+        "createAndStart": "צור קבוצה והתחל",
+        "defaultGroupName": "החיפוש שלי",
+        "errorCreate": "שגיאה ביצירת קבוצה, נסה שנית",
+        "groupCreatedTitle": "הקבוצה נוצרה בהצלחה! 🎉",
+        "shareCodeDesc": "שתפו את הקוד הזה עם השותף/ה שלכם כדי שיצטרפו לחיפוש:",
+        "partnerInstructions": "הם יצטרכו להירשם לאפליקציה ולבחור במסך זה באפשרות 'יש לי קוד הזמנה'.",
+        "shareLaterNote": "אל דאגה, תוכלו למצוא ולשתף את הקוד הזה תמיד גם במסך 'ניהול שותפים'.",
+        "copyCode": "העתק קוד",
+        "codeCopied": "הקוד הועתק!",
+        "continueToDashboard": "המשך ללוח הדירות"
     },
     "agentMode": {
         "dashboardTitle": "לוח בקרת סוכן",
@@ -235,7 +271,9 @@
         "mamad": "ממ״ד",
         "warehouse": "מחסן",
         "reqAdded": "הדרישה נוספה בהצלחה!",
-        "addQuestion": "הוסף שאלה"
+        "addQuestion": "הוסף שאלה",
+        "addAdditionalContact": "הוסף איש קשר נוסף",
+        "addCustomFeaturePlaceholder": "למשל: מחסן, משופצת, כיווני אוויר..."
     },
     "gallery": {
         "upload": "העלאת תמונות",

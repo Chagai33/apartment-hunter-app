@@ -50,6 +50,7 @@ export function ApartmentDetails() {
         }, 10000);
 
         const unsubApartment = onSnapshot(doc(db, 'apartments', id), (docSnap) => {
+            clearTimeout(timeoutId);
             if (isMounted.current) {
                 if (docSnap.exists()) {
                     setApartment({ id: docSnap.id, ...docSnap.data() } as Apartment);
@@ -60,6 +61,7 @@ export function ApartmentDetails() {
                 }
             }
         }, (error) => {
+            clearTimeout(timeoutId);
             console.error("Error fetching apartment:", error);
             if (isMounted.current) {
                 toast.error(t('common.error'));
@@ -112,27 +114,24 @@ export function ApartmentDetails() {
         };
     }, [id, navigate, user, t, activeGroupId, groups]);
 
-    const toggleField = async (field: keyof Apartment) => {
+    const setFieldValue = async (field: keyof Apartment, value: boolean | null) => {
         if (!apartment || !id) return;
-        const newValue = !apartment[field];
 
         try {
-            await updateDoc(doc(db, 'apartments', id), { [field]: newValue });
+            await updateDoc(doc(db, 'apartments', id), { [field]: value });
         } catch (error) {
             console.error(error);
             toast.error(t('common.error'));
         }
     };
 
-    const toggleCustomCheck = async (templateId: string) => {
+    const setCustomCheckValue = async (templateId: string, value: boolean | null) => {
         if (!apartment || !id) return;
-        const currentVal = apartment.customChecks?.[templateId] || false;
-        const newValue = !currentVal;
 
         try {
             const updatedChecks = {
                 ...(apartment.customChecks || {}),
-                [templateId]: newValue
+                [templateId]: value
             };
             await updateDoc(doc(db, 'apartments', id), { customChecks: updatedChecks });
         } catch (error) {
@@ -159,7 +158,6 @@ export function ApartmentDetails() {
     };
 
     const renderCustomItem = (template: CustomChecklistTemplate) => {
-        const isChecked = apartment?.customChecks?.[template.id] || false;
         const hasNote = apartment?.checklistNotes?.[template.id];
         const isEditingNote = activeNoteField === template.id;
 
@@ -183,22 +181,46 @@ export function ApartmentDetails() {
                     </button>
 
                     {/* Label */}
-                    <button onClick={() => toggleCustomCheck(template.id)} className="flex-1 text-right mr-3">
+                    <div className="flex-1 text-right mr-3">
                         <span className="text-gray-700 font-medium text-sm">{template.label}</span>
                         {hasNote && !isEditingNote && (
                             <div className="text-xs text-gray-500 mt-1 truncate max-w-[200px]">{hasNote}</div>
                         )}
-                    </button>
+                    </div>
 
-                    {/* Checkbox */}
-                    <button onClick={() => toggleCustomCheck(template.id)}>
-                        <div className={clsx(
-                            "w-5 h-5 rounded border flex items-center justify-center transition-colors",
-                            isChecked ? "bg-blue-500 border-blue-500" : "border-gray-300 bg-white"
-                        )}>
-                            {isChecked && <Check size={14} className="text-white" />}
-                        </div>
-                    </button>
+                    {/* 3-State Buttons */}
+                    <div className="flex bg-gray-100 p-1 rounded-lg shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => setCustomCheckValue(template.id, true)}
+                            className={clsx(
+                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                apartment?.customChecks?.[template.id] === true ? "bg-white text-green-700 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                            )}
+                        >
+                            {t('common.yes', 'יש')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setCustomCheckValue(template.id, null)}
+                            className={clsx(
+                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                apartment?.customChecks?.[template.id] == null ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                            )}
+                        >
+                            {t('common.doesntMatter', '—')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setCustomCheckValue(template.id, false)}
+                            className={clsx(
+                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                apartment?.customChecks?.[template.id] === false ? "bg-white text-red-700 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                            )}
+                        >
+                            {t('common.no', 'אין')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Note Edit Input */}
@@ -335,12 +357,17 @@ export function ApartmentDetails() {
         if (preferences.mustHaveParking && !apartment.parking) missing.push(t('apartment.parking'));
         if (preferences.mustHaveBalcony && !apartment.balcony) missing.push(t('apartment.balcony'));
         if (preferences.mustHaveAC && !apartment.ac) missing.push(t('apartment.ac'));
-        if (preferences.mustHaveMamad && !apartment.tama38 && !apartment.notes?.includes('ממ"ד')) missing.push('ממ״ד'); // Kept hardcoded as it checks specific text
+
+        const hasMamad = apartment.tama38 || apartment.notes?.includes('ממ"ד');
+        if (preferences.mustHaveMamad && !hasMamad) missing.push('ממ״ד');
+
         if (preferences.mustHavePets && !apartment.pets) missing.push(t('apartment.pets'));
+        if (preferences.mustHaveFurnished && !apartment.furnished) missing.push(t('apartment.furnished'));
 
         if (preferences.maxPrice && apartment.price > preferences.maxPrice) missing.push(`${t('settings.maxPrice')} (${preferences.maxPrice} ₪)`);
         if (preferences.minRooms && (apartment.rooms || 0) < preferences.minRooms) missing.push(`${t('settings.minRooms')} (${preferences.minRooms})`);
 
+        // Custom Requirements Check
         if (preferences.customMustHaves) {
             preferences.customMustHaves.forEach(templateId => {
                 const template = checklistTemplates.find(t => t.id === templateId);
@@ -384,22 +411,46 @@ export function ApartmentDetails() {
                     </button>
 
                     {/* Label */}
-                    <button onClick={() => toggleField(field)} className="flex-1 text-right mr-3">
+                    <div className="flex-1 text-right mr-3">
                         <span className="text-gray-700 font-medium text-sm">{label}</span>
                         {hasNote && !isEditingNote && (
                             <div className="text-xs text-gray-500 mt-1 truncate max-w-[200px]">{hasNote}</div>
                         )}
-                    </button>
+                    </div>
 
-                    {/* Checkbox */}
-                    <button onClick={() => toggleField(field)}>
-                        <div className={clsx(
-                            "w-5 h-5 rounded border flex items-center justify-center transition-colors",
-                            apartment[field] ? "bg-blue-500 border-blue-500" : "border-gray-300 bg-white"
-                        )}>
-                            {apartment[field] && <Check size={14} className="text-white" />}
-                        </div>
-                    </button>
+                    {/* 3-State Buttons */}
+                    <div className="flex bg-gray-100 p-1 rounded-lg shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => setFieldValue(field, true)}
+                            className={clsx(
+                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                apartment[field] === true ? "bg-white text-green-700 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                            )}
+                        >
+                            {t('common.yes', 'יש')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFieldValue(field, null)}
+                            className={clsx(
+                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                apartment[field] == null ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                            )}
+                        >
+                            {t('common.doesntMatter', '—')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFieldValue(field, false)}
+                            className={clsx(
+                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                apartment[field] === false ? "bg-white text-red-700 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                            )}
+                        >
+                            {t('common.no', 'אין')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Note Edit Input */}

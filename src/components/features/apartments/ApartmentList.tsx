@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useGroup } from '../../../context/GroupContext';
-import { Apartment, UserPreferences } from '../../../types';
+import { Apartment, UserPreferences, CustomChecklistTemplate } from '../../../types';
 import { useApartments } from '../../../hooks/useApartments';
 import { ApartmentCard } from './ApartmentCard';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ export function ApartmentList() {
     const { apartments, loading } = useApartments();
 
     const [preferences, setPreferences] = useState<UserPreferences | null>(null);
+    const [checklistTemplates, setChecklistTemplates] = useState<CustomChecklistTemplate[]>([]);
     const [filterByGroup, setFilterByGroup] = useState(false);
 
     // Load Preferences (Context Aware)
@@ -33,17 +34,19 @@ export function ApartmentList() {
             } else {
                 setPreferences(null);
             }
+            if (currentGroup && currentGroup.checklistTemplates) {
+                setChecklistTemplates(currentGroup.checklistTemplates);
+            } else {
+                setChecklistTemplates([]);
+            }
         } else {
             // Personal Mode
             if (user) {
                 unsubUser = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         const userData = docSnap.data();
-                        if (userData.preferences) {
-                            setPreferences(userData.preferences);
-                        } else {
-                            setPreferences(null);
-                        }
+                        setPreferences(userData.preferences || null);
+                        setChecklistTemplates(userData.checklistTemplates || []);
                     }
                 });
             }
@@ -60,9 +63,22 @@ export function ApartmentList() {
         if (prefs.mustHaveParking && !apartment.parking) return false;
         if (prefs.mustHaveBalcony && !apartment.balcony) return false;
         if (prefs.mustHaveAC && !apartment.ac) return false;
-        if (prefs.mustHaveMamad && !apartment.tama38 && !apartment.notes?.includes('ממ"ד')) return false;
+
+        const hasMamad = apartment.tama38 || apartment.notes?.includes('ממ"ד');
+        if (prefs.mustHaveMamad && !hasMamad) return false;
+
         if (prefs.mustHavePets && !apartment.pets) return false;
         if (prefs.mustHaveFurnished && !apartment.furnished) return false;
+
+        // Custom Requirements Check
+        const apartmentChecks = apartment.customChecks || {};
+
+        // Custom Must Haves (IDs array)
+        if (prefs.customMustHaves?.length) {
+            for (const templateId of prefs.customMustHaves) {
+                if (!apartmentChecks[templateId]) return false;
+            }
+        }
 
         if (prefs.maxPrice && apartment.price > prefs.maxPrice) return false;
         if (prefs.minRooms && (apartment.rooms || 0) < prefs.minRooms) return false;
@@ -165,6 +181,7 @@ export function ApartmentList() {
                             key={apartment.id}
                             apartment={apartment}
                             preferences={preferences} // Pass prefs to card for match badge
+                            checklistTemplates={checklistTemplates}
                         />
                     ))}
                 </div>
