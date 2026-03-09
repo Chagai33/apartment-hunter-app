@@ -56,6 +56,8 @@ export interface Apartment {
     floor?: number;
     size?: number; // sq meters
     link?: string;
+    entranceDate?: string; // e.g. "1.4", "מיידי"
+    sourceText?: string; // The original text or base64 image used for AI import
 
     // Status
     status: ApartmentStatus;
@@ -101,6 +103,8 @@ export interface Apartment {
     doubleGlazed?: boolean;
     moldCheck?: boolean; // No mold
     mobileReception?: boolean;
+    rearFacing?: boolean; // עורפית
+    frontFacing?: boolean; // חזית
 
     // Commercial
     brokerFee?: boolean;

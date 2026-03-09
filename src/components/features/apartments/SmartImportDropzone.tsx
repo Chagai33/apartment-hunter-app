@@ -7,7 +7,7 @@ import { functions } from '../../../lib/firebase';
 import toast from 'react-hot-toast';
 
 interface SmartImportDropzoneProps {
-    onExtractSuccess: (data: any) => void;
+    onExtractSuccess: (data: any, originalSource: string) => void;
     onExtractStart: () => void;
     onExtractEnd: () => void;
     customCheckLabels?: string[];
@@ -56,7 +56,7 @@ export function SmartImportDropzone({ onExtractSuccess, onExtractStart, onExtrac
                 customCheckLabels
             });
 
-            onExtractSuccess(result.data);
+            onExtractSuccess(result.data, base64);
             toast.success(t('apartment.import.success', 'Data extracted successfully!'));
         } catch (error: any) {
             console.error("Extraction error:", error);
@@ -74,7 +74,7 @@ export function SmartImportDropzone({ onExtractSuccess, onExtractStart, onExtrac
             const analyzeFunc = httpsCallable(functions, 'analyzeApartmentData');
             const result = await analyzeFunc({ text: textInput, customCheckLabels });
 
-            onExtractSuccess(result.data);
+            onExtractSuccess(result.data, textInput);
             setTextInput(''); // Clear input on success
             toast.success(t('apartment.import.success', 'Data extracted successfully!'));
         } catch (error: any) {

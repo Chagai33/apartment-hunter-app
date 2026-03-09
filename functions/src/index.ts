@@ -58,7 +58,25 @@ export const analyzeApartmentData = onCall(
         // 2. Prepare Gemini Prompt
         const promptParams = [];
 
-        let promptText = "Extract apartment details from the provided content.";
+        let promptText = `
+You are an expert Israeli real estate assistant. Extract apartment details extremely accurately from the provided Hebrew content.
+STRICT ANTI-HALLUCINATION RULES:
+- ONLY extract information explicitly stated in the text. NEVER infer, guess, or assume features (like elevator, ac, or parking) just because an apartment is "new" or "renovated".
+- If a boolean feature is NOT mentioned, you MUST OMIT IT entirely (leave it undefined/null). Do not set to true or false unless explicit.
+
+Specific Extraction Rules:
+1. "ללא תיווך" means NO broker -> \`brokerFee: false\`. If there is a broker/תיווך -> \`brokerFee: true\`.
+2. Prices and Costs: "ועד בית" -> extract realistic monthly cost for \`vaad\` (e.g. 50-2000). "ארנונה" -> extract realistic cost for \`arnona\`. Ignore long ID/barcode numbers (e.g., "0000000006").
+3. Dates: "כניסה" -> extract condition (e.g., "מיידי", "1.4", "גמיש", "תאריך קרוב") into \`entranceDate\`.
+4. Direction: "עורפית" -> \`rearFacing: true\`. "חזית" -> \`frontFacing: true\`.
+5. Features: Look for explicit Hebrew words. "מזגן" -> \`ac: true\`, "מרפסת" -> \`balcony: true\`, "חניה" -> \`parking: true\`, "מותר בעלי חיים" / "בע"ח" / "כלב" / "חתול" -> \`pets: true\`, "מעלית" -> \`elevator: true\`, "מרוהט" -> \`furnished: true\`. "מקלט" or "ממד" or "ממ"ק" -> \`tama38: true\`. Omitting them means unknown.
+6. Rooms and Floor: "קומה X" -> \`floor: X\` (extract the number, if "קרקע" -> 0). "X חדרים" -> \`rooms: X\`.
+7. Phone Numbers: Extract ONLY digits for \`ownerPhone\` (e.g., "0524825881"). Ignore spaces/dashes. Check the end of text!
+8. CATCH-ALL FOR MISSING SCHEMA FIELDS (CRITICAL):
+   Any feature or condition that does not fit the schema MUST be placed in \`notes\` or \`inferredCustomChecks\`. 
+   Examples: "קודן בכניסה", "מרפסת גג", "יחידת הורים", "סורגים", "מחפשים מחליפים", special viewing times, furniture for sale, etc.
+   DO NOT DROP ANY APARTMENT FEATURE OR CONDITION. Put it in notes!
+`;
         if (data.customCheckLabels && data.customCheckLabels.length > 0) {
             promptText += `\n\nAlso check if the following features are present (return in 'inferredCustomChecks'): ${data.customCheckLabels.join(', ')}. Only include them if explicitly mentioned or strongly implied.`;
         }
@@ -66,6 +84,7 @@ export const analyzeApartmentData = onCall(
         if (data.text) {
             promptText += `\n\nText Content:\n${data.text}`;
         }
+
         promptParams.push(promptText);
 
         if (data.imageBase64 && data.mimeType) {
@@ -94,6 +113,8 @@ export const analyzeApartmentData = onCall(
                             neighborhood: { type: "STRING", nullable: true },
                             price: { type: "NUMBER", nullable: true },
                             rooms: { type: "NUMBER", nullable: true },
+                            floor: { type: "NUMBER", nullable: true },
+                            size: { type: "NUMBER", nullable: true },
                             elevator: { type: "BOOLEAN", nullable: true },
                             parking: { type: "BOOLEAN", nullable: true },
                             balcony: { type: "BOOLEAN", nullable: true },
@@ -101,6 +122,12 @@ export const analyzeApartmentData = onCall(
                             tama38: { type: "BOOLEAN", nullable: true },
                             pets: { type: "BOOLEAN", nullable: true },
                             furnished: { type: "BOOLEAN", nullable: true },
+                            rearFacing: { type: "BOOLEAN", nullable: true },
+                            frontFacing: { type: "BOOLEAN", nullable: true },
+                            brokerFee: { type: "BOOLEAN", nullable: true },
+                            vaad: { type: "NUMBER", nullable: true },
+                            arnona: { type: "NUMBER", nullable: true },
+                            entranceDate: { type: "STRING", nullable: true },
                             notes: { type: "STRING", nullable: true },
                             ownerName: { type: "STRING", nullable: true },
                             ownerPhone: { type: "STRING", nullable: true },
