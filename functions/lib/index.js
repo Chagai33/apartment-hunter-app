@@ -40,16 +40,16 @@ const genai_1 = require("@google/genai");
 const schema_1 = require("./schema");
 admin.initializeApp();
 const db = admin.firestore();
-// Initialize the Gemini client. We will use the api key from environment variables or Firebase Secrets.
-// We expect process.env.GEMINI_API_KEY to be set
-const ai = new genai_1.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const AI_MODEL = "gemini-2.5-flash-lite"; // Faster and cheaper for structured extraction
 const DAILY_LIMIT = 20;
 exports.analyzeApartmentData = (0, https_1.onCall)({
     secrets: ["GEMINI_API_KEY"],
     region: "europe-west1",
-    maxInstances: 10
+    maxInstances: 10,
+    invoker: "public"
 }, async (request) => {
+    // Initialize the Gemini client here so process.env.GEMINI_API_KEY is available during execution.
+    const ai = new genai_1.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const uid = request.auth?.uid;
     if (!uid) {
         throw new https_1.HttpsError("unauthenticated", "User must be logged in.");
