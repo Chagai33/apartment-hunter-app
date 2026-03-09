@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GroupProvider, useGroup } from './context/GroupContext';
 import { LanguageProvider } from './context/LanguageContext';
-import { AppShell } from './components/layout/AppShell';
+import { Layout } from './templates/Layout';
 import { LoginPage } from './components/features/auth/LoginPage';
 import { LandingPage } from './components/layout/LandingPage';
 import { UserGuide } from './components/layout/UserGuide';
@@ -51,7 +51,7 @@ export default function App() {
             <LanguageProvider>
                 <AuthProvider>
                     <GroupProvider>
-                        <AppShell>
+                        <Layout>
                             <Suspense fallback={<div className="p-10 text-center">Loading app...</div>}>
                                 <Routes>
                                     <Route path="/login" element={<LoginPage />} />
@@ -106,7 +106,7 @@ export default function App() {
                                     <Route path="/accessibility" element={<AccessibilityStatement />} />
                                 </Routes>
                             </Suspense>
-                        </AppShell>
+                        </Layout>
                     </GroupProvider>
                 </AuthProvider>
             </LanguageProvider>

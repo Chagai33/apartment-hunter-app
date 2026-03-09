@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Input } from '../../common/Input';
 import { Apartment, CustomChecklistTemplate } from '../../../types';
 import { onSnapshot, updateDoc } from 'firebase/firestore';
+import { SmartImportDropzone } from './SmartImportDropzone';
 
 export function ApartmentForm() {
     const { id } = useParams();
@@ -32,8 +33,12 @@ export function ApartmentForm() {
     const [checklistTemplates, setChecklistTemplates] = useState<CustomChecklistTemplate[]>([]);
     const [customFeatureInput, setCustomFeatureInput] = useState('');
 
+    // Smart Import State
+    const [isExtracting, setIsExtracting] = useState(false);
+    const [extractedMissingFields, setExtractedMissingFields] = useState<string[]>([]);
+
     // We use Partial<Apartment> for the form values
-    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<Partial<Apartment>>({
+    const { register, handleSubmit, reset, setValue, watch, getValues, formState: { errors } } = useForm<Partial<Apartment>>({
         defaultValues: {
             address: '',
             neighborhood: '',
@@ -234,10 +239,98 @@ export function ApartmentForm() {
         );
     }
 
+    const handleExtractSuccess = (data: any) => {
+        // Find custom checks matching the inferred ones
+        let newCustomChecks = { ...customChecks };
+
+        if (data.inferredCustomChecks) {
+            Object.entries(data.inferredCustomChecks).forEach(([key, value]) => {
+                if (value) {
+                    // Try to find a matching existing template by label (case insensitive approach or similar logic)
+                    // Or we just add it to custom checks if an ID matches
+                    // Since Gemini returns raw strings, we might need a mapping or we create new templates here
+                    // For simplicity, if we don't have a template we just ignore for now in the UI logic or create one.
+                    // For this demo, let's look for templates that include the key in their label (naive match)
+
+                    const matchedTemplate = checklistTemplates.find(ct =>
+                        ct.label.toLowerCase().includes(key.toLowerCase()) ||
+                        key.toLowerCase().includes(ct.label.toLowerCase())
+                    );
+
+                    if (matchedTemplate) {
+                        newCustomChecks[matchedTemplate.id] = true;
+                    }
+                }
+            });
+        }
+
+        setCustomChecks(newCustomChecks);
+
+        const currentValues = getValues();
+
+        // Populate Form
+        reset({
+            ...currentValues, // Keep current group id and refs
+            address: data.address || currentValues.address,
+            neighborhood: data.neighborhood || currentValues.neighborhood,
+            price: data.price || currentValues.price,
+            rooms: data.rooms || currentValues.rooms,
+            elevator: data.elevator != null ? data.elevator : currentValues.elevator,
+            parking: data.parking != null ? data.parking : currentValues.parking,
+            balcony: data.balcony != null ? data.balcony : currentValues.balcony,
+            ac: data.ac != null ? data.ac : currentValues.ac,
+            tama38: data.tama38 != null ? data.tama38 : currentValues.tama38,
+            pets: data.pets != null ? data.pets : currentValues.pets,
+            furnished: data.furnished != null ? data.furnished : currentValues.furnished,
+            notes: data.notes || currentValues.notes,
+            ownerName: data.ownerName || currentValues.ownerName,
+            ownerPhone: data.ownerPhone || currentValues.ownerPhone,
+        });
+
+        if (data.ownerName || data.ownerPhone) {
+            setShowAdditionalContact(true);
+        }
+
+        // Highlight missing main fields
+        const missing = [];
+        if (!data.address) missing.push('address');
+        if (!data.price) missing.push('price');
+        setExtractedMissingFields(missing);
+
+        setIsExtracting(false);
+    };
+
     return (
         <div className="p-4 pb-24 max-w-2xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">{id ? t('common.edit') : t('apartment.addNew')}</h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+            {/* Smart Import Form (Only visible when creating a new apartment, or we can allow everywhere) */}
+            <SmartImportDropzone
+                onExtractStart={() => setIsExtracting(true)}
+                onExtractEnd={() => setIsExtracting(false)}
+                onExtractSuccess={handleExtractSuccess}
+                customCheckLabels={checklistTemplates.map(t => t.label)}
+            />
+
+            {isExtracting && (
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 flex flex-col items-center justify-center border border-blue-100 shadow-sm my-8 relative">
+                    <button
+                        type="button"
+                        onClick={() => setIsExtracting(false)}
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        title="Cancel"
+                    >
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-blue-900 font-medium">Extracting details from your file with AI...</p>
+                    <p className="text-sm text-blue-600/70 mt-1">This takes just a few seconds.</p>
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className={clsx("space-y-4 transition-opacity duration-300", isExtracting && "opacity-20 pointer-events-none")}>
 
                 {!activeGroupId && !id && (
                     <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 mb-4">
@@ -255,11 +348,15 @@ export function ApartmentForm() {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input label={t('apartment.address')} {...register('address', { required: true })} />
+                    <div className={clsx("transition-all", extractedMissingFields.includes('address') && "ring-2 ring-orange-400 rounded-xl p-1")}>
+                        <Input label={t('apartment.address')} {...register('address', { required: true })} />
+                    </div>
                     <Input label={t('apartment.neighborhood')} {...register('neighborhood', { required: true })} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                    <Input label={t('apartment.price')} type="number" {...register('price', { required: true })} />
+                    <div className={clsx("transition-all", extractedMissingFields.includes('price') && "ring-2 ring-orange-400 rounded-xl p-1")}>
+                        <Input label={t('apartment.price')} type="number" {...register('price', { required: true })} />
+                    </div>
 
                     {/* Rooms Input */}
                     <div className="flex flex-col gap-1">
