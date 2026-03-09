@@ -61,21 +61,24 @@ export const analyzeApartmentData = onCall(
         let promptText = `
 You are an expert Israeli real estate assistant. Extract apartment details extremely accurately from the provided Hebrew content.
 STRICT ANTI-HALLUCINATION RULES:
-- ONLY extract information explicitly stated in the text. NEVER infer, guess, or assume features (like elevator, ac, or parking) just because an apartment is "new" or "renovated".
+- ONLY extract information explicitly stated in the text. NEVER infer, guess, or assume features (like elevator, ac, or parking).
 - If a boolean feature is NOT mentioned, you MUST OMIT IT entirely (leave it undefined/null). Do not set to true or false unless explicit.
 
 Specific Extraction Rules:
-1. "ללא תיווך" means NO broker -> \`brokerFee: false\`. If there is a broker/תיווך -> \`brokerFee: true\`.
-2. Prices and Costs: "ועד בית" -> extract realistic monthly cost for \`vaad\` (e.g. 50-2000). "ארנונה" -> extract realistic cost for \`arnona\`. Ignore long ID/barcode numbers (e.g., "0000000006").
-3. Dates: "כניסה" -> extract condition (e.g., "מיידי", "1.4", "גמיש", "תאריך קרוב") into \`entranceDate\`.
+1. Brokerage ("תיווך"): "ללא תיווך" (even with punctuation like "ללא תיווך!") means NO broker -> \`brokerFee: false\`. If there is a broker explicitly mentioned -> \`brokerFee: true\`.
+2. Prices and Costs: "ועד בית" -> extract realistic monthly cost for \`vaad\`. "ארנונה" -> extract realistic cost for \`arnona\`. Ignore long ID/barcode numbers.
+3. Dates: "כניסה" -> extract condition (e.g., "מיידי", "1.4", "גמיש") into \`entranceDate\`.
 4. Direction: "עורפית" -> \`rearFacing: true\`. "חזית" -> \`frontFacing: true\`.
-5. Features: Look for explicit Hebrew words. "מזגן" -> \`ac: true\`, "מרפסת" -> \`balcony: true\`, "חניה" -> \`parking: true\`, "מותר בעלי חיים" / "בע"ח" / "כלב" / "חתול" -> \`pets: true\`, "מעלית" -> \`elevator: true\`, "מרוהט" -> \`furnished: true\`. "מקלט" or "ממד" or "ממ"ק" -> \`tama38: true\`. Omitting them means unknown.
-6. Rooms and Floor: "קומה X" -> \`floor: X\` (extract the number, if "קרקע" -> 0). "X חדרים" -> \`rooms: X\`.
-7. Phone Numbers: Extract ONLY digits for \`ownerPhone\` (e.g., "0524825881"). Ignore spaces/dashes. Check the end of text!
-8. CATCH-ALL FOR MISSING SCHEMA FIELDS (CRITICAL):
-   Any feature or condition that does not fit the schema MUST be placed in \`notes\` or \`inferredCustomChecks\`. 
-   Examples: "קודן בכניסה", "מרפסת גג", "יחידת הורים", "סורגים", "מחפשים מחליפים", special viewing times, furniture for sale, etc.
-   DO NOT DROP ANY APARTMENT FEATURE OR CONDITION. Put it in notes!
+5. Features: Look for explicit Hebrew words. "מזגן" -> \`ac: true\`, "מרפסת" -> \`balcony: true\`, "חניה" -> \`parking: true\`, "מותר בעלי חיים"/"בע"ח"/"כלב"/"חתול" -> \`pets: true\`, "מעלית" -> \`elevator: true\`, "מרוהט" -> \`furnished: true\`. "מקלט" or "ממד" or "ממ"ק" -> \`tama38: true\`.
+6. Rooms and Floor: 
+   - "קומה X" -> \`floor: X\`. "קומת קרקע" or "קרקע" -> \`floor: 0\`. If "מרתף", try \`-1\`.
+   - "X חדרים" -> \`rooms: X\`. "סטודיו" or "דירת סטודיו" -> \`rooms: 1\` (or 1.5 if specified).
+7. Location: Extract the exact neighborhood name without prefixes like "שכונת " (e.g., "שכונת תל חיים" -> \`neighborhood: "תל חיים"\`).
+8. Phone Numbers: Extract ONLY digits for \`ownerPhone\` (e.g., "0524825881"). Ignore spaces/dashes. Look at the end of the text and inside images.
+9. CATCH-ALL FOR MISSING SCHEMA FIELDS (CRITICAL):
+   Any feature that does not map to a strict schema field MUST be placed in \`notes\` or \`inferredCustomChecks\`. 
+   MANDATORY Notes Examples: "קודן בכניסה", "חצר", "גינה", "כולל הכל" (bills included), "כולל מים וארנונה", "מרפסת גג", "סורגים", "דוד שמש", "מחפשים מחליפים" (sublet).
+   DO NOT DROP ANY APARTMENT FEATURE, RULE, OR CONDITION. If it's not a standard boolean, put it in notes!
 `;
         if (data.customCheckLabels && data.customCheckLabels.length > 0) {
             promptText += `\n\nAlso check if the following features are present (return in 'inferredCustomChecks'): ${data.customCheckLabels.join(', ')}. Only include them if explicitly mentioned or strongly implied.`;
