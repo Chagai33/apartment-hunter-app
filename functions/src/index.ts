@@ -61,21 +61,25 @@ export const analyzeApartmentData = onCall(
         let promptText = `
 You are an expert Israeli real estate assistant. Extract apartment details extremely accurately from the provided Hebrew content.
 STRICT ANTI-HALLUCINATION RULES:
-- ONLY extract information explicitly stated in the text. NEVER infer, guess, or assume features (like elevator, ac, or parking) just because an apartment is "new" or "renovated".
+- ONLY extract information explicitly stated in the text. NEVER infer, guess, or assume features.
 - If a boolean feature is NOT mentioned, you MUST OMIT IT entirely (leave it undefined/null). Do not set to true or false unless explicit.
 
 Specific Extraction Rules:
-1. "ללא תיווך" means NO broker -> \`brokerFee: false\`. If there is a broker/תיווך -> \`brokerFee: true\`.
-2. Prices and Costs: "ועד בית" -> extract realistic monthly cost for \`vaad\` (e.g. 50-2000). "ארנונה" -> extract realistic cost for \`arnona\`. Ignore long ID/barcode numbers (e.g., "0000000006").
-3. Dates: "כניסה" -> extract condition (e.g., "מיידי", "1.4", "גמיש", "תאריך קרוב") into \`entranceDate\`.
-4. Direction: "עורפית" -> \`rearFacing: true\`. "חזית" -> \`frontFacing: true\`.
-5. Features: Look for explicit Hebrew words. "מזגן" -> \`ac: true\`, "מרפסת" -> \`balcony: true\`, "חניה" -> \`parking: true\`, "מותר בעלי חיים" / "בע"ח" / "כלב" / "חתול" -> \`pets: true\`, "מעלית" -> \`elevator: true\`, "מרוהט" -> \`furnished: true\`. "מקלט" or "ממד" or "ממ"ק" -> \`tama38: true\`. Omitting them means unknown.
-6. Rooms and Floor: "קומה X" -> \`floor: X\` (extract the number, if "קרקע" -> 0). "X חדרים" -> \`rooms: X\`.
-7. Phone Numbers: Extract ONLY digits for \`ownerPhone\` (e.g., "0524825881"). Ignore spaces/dashes. Check the end of text!
-8. CATCH-ALL FOR MISSING SCHEMA FIELDS (CRITICAL):
-   Any feature or condition that does not fit the schema MUST be placed in \`notes\` or \`inferredCustomChecks\`. 
-   Examples: "קודן בכניסה", "מרפסת גג", "יחידת הורים", "סורגים", "מחפשים מחליפים", special viewing times, furniture for sale, etc.
-   DO NOT DROP ANY APARTMENT FEATURE OR CONDITION. Put it in notes!
+1. Broker Fee: "ללא תיווך" / "ללא עמלת תיווך" (even with punctuation like "ללא תיווך !") MUST map strictly to \`brokerFee: false\`. If an agent is posting, or it says "תיווך", map to \`brokerFee: true\`.
+2. Address & Neighborhood: Strongly attempt to extract the neighborhood into \`neighborhood\` (e.g. "שכונת תל חיים" -> "תל חיים").
+3. Rooms and Floor: 
+   - "סטודיו" or "דירת סטודיו" -> \`rooms: 1\`. "X חדרים" -> \`rooms: X\`.
+   - "קומת קרקע" -> \`floor: 0\`. "קומה X" -> \`floor: X\`.
+4. Prices and Costs: "שכירות כולל הכל" / "חשבשות כלולים" -> Add this exact phrase to the \`notes\`! "ועד בית" -> extract monthly cost. "ארנונה" -> extract bi-monthly cost.
+5. Dates: "כניסה" -> extract condition (e.g., "מיידי", "1.4", "גמיש", "תאריך קרוב") into \`entranceDate\`.
+6. Direction: "עורפית" -> \`rearFacing: true\`. "חזית" -> \`frontFacing: true\`.
+7. Core Features: "מזגן" -> \`ac: true\`, "מרפסת" -> \`balcony: true\`, "חניה" -> \`parking: true\`, "מותר בעלי חיים" / "בע"ח" / "כלב" / "חתול" -> \`pets: true\`, "מעלית" -> \`elevator: true\`, "מרוהט" -> \`furnished: true\`. 
+   "ממד" -> \`tama38: true\`. DO NOT map "מקלט" or "ממ"ק" to tama38 (see rule 9).
+8. Phone Numbers: Extract ONLY digits for \`ownerPhone\` (e.g., "0524825881"). Ignore spaces/dashes.
+9. CATCH-ALL RECORD (CRITICAL - EXACT PHRASING):
+   Any other feature ("מקלט בבניין", "ממ"ק", "חצר", "קודן בכניסה", "מרפסת גג", "סורגים", etc.) MUST be extracted EXACTLY AS IT IS WRITTEN in the text and placed into \`inferredCustomChecks\` as a \`true\` boolean.
+   For example, if the text says "מקלט בבניין", you must include \`{"מקלט בבניין": true}\` in \`inferredCustomChecks\`. Do NOT translate or generalize it to English. Write the EXACT Hebrew phrase the AI recognized.
+   Other conditions (furniture for sale, viewing times, sublet) go into \`notes\`.
 `;
         if (data.customCheckLabels && data.customCheckLabels.length > 0) {
             promptText += `\n\nAlso check if the following features are present (return in 'inferredCustomChecks'): ${data.customCheckLabels.join(', ')}. Only include them if explicitly mentioned or strongly implied.`;

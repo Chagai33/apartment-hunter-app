@@ -217,10 +217,43 @@ export function PreferencesForm({ hideHeader }: { hideHeader?: boolean }) {
                         <Toggle name="mustHaveParking" label={t('apartment.parking')} />
                         <Toggle name="mustHaveBalcony" label={t('apartment.balcony')} />
                         <Toggle name="mustHaveAC" label={t('apartment.ac')} />
-                        <Toggle name="mustHaveMamad" label={t('apartment.mamad')} />
                         <Toggle name="mustHaveTama38" label={t('apartment.tama38')} />
                         <Toggle name="mustHavePets" label={t('apartment.pets')} />
                         <Toggle name="mustHaveFurnished" label={t('apartment.furnished')} />
+                    </div>
+
+                    {/* Shelter allow-list */}
+                    <div className="mt-8 border-t pt-6">
+                        <h3 className="font-medium text-gray-800 mb-1">{t('settings.acceptedShelters', 'רמות מיגון רצויות')}</h3>
+                        <p className="text-gray-500 mb-4 text-xs">{t('settings.acceptedSheltersSubtitle', 'סמן את רמות המיגון המקובלות עליך. דירה עם לפחות אחת לחופוף מהרמות תחשב כהתאמה.')}</p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                            {['ממ״ד / תמ״א 38', 'ממ״ק', 'מקלט בבניין', 'ממ״ד משותף', 'מקלט ציבורי', 'ללא מיגון'].map(shelterOption => {
+                                const acceptedShelters = watch('acceptedShelters') || [];
+                                const isSelected = acceptedShelters.includes(shelterOption);
+
+                                return (
+                                    <div
+                                        key={shelterOption}
+                                        onClick={() => {
+                                            const newValue = isSelected
+                                                ? acceptedShelters.filter(id => id !== shelterOption)
+                                                : [...acceptedShelters, shelterOption];
+                                            setValue('acceptedShelters', newValue);
+                                        }}
+                                        className="flex items-center justify-between p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
+                                    >
+                                        <span className="font-medium text-gray-700 truncate">{shelterOption}</span>
+                                        <div className={clsx(
+                                            "w-6 h-6 rounded flex items-center justify-center transition-colors duration-200 border",
+                                            isSelected ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-gray-300"
+                                        )}>
+                                            {isSelected && <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     {/* Custom Features Checklist */}

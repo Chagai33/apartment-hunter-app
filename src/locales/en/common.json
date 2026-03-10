@@ -1,5 +1,10 @@
 {
     "common": {
+        "yes": "Yes",
+        "no": "No",
+        "remove": "Remove",
+        "selectGroup": "Select Group",
+        "selectGroupPlaceholder": "-- Select Group --",
         "loading": "Loading...",
         "error": "An error occurred",
         "save": "Save",
@@ -93,6 +98,7 @@
         "copyright": "© 2026 Apartment Hunter. Built by Chagai Yehiel."
     },
     "settings": {
+        "addRequirementFromBank": "Add feature from bank or create new",
         "title": "Search Settings",
         "subtitle": "Define must-haves for your apartment to get alerts",
         "saveSuccess": "Settings saved successfully",
@@ -214,6 +220,28 @@
         "continueToDashboard": "Continue to Dashboard"
     },
     "apartment": {
+        "groups": {
+            "basicSpecs": "Basic Specifications",
+            "financials": "Financials",
+            "building": "Building & Location",
+            "features": "Apartment Features",
+            "contactDetails": "Contact Details"
+        },
+        "floor": "Floor",
+        "size": "Size (m²)",
+        "entranceDate": "Entrance Date",
+        "entranceDatePlaceholder": "e.g. 1.8, Immediate...",
+        "showAllDetails": "Show all other details (Optional)",
+        "vaad": "Vaad Bayit (HOA)",
+        "frontFacing": "Front Facing",
+        "rearFacing": "Rear Facing",
+        "renovated": "Renovated",
+        "customFeaturesTitle": "Additional Features",
+        "notesPlaceholder": "Any other details...",
+        "sourceText": "Original Source Data (Additional)",
+        "sourceDisclaimer": "This is the original text or image used to populate the form. You can cross-reference it here to ensure accuracy.",
+        "extractingDetails": "Extracting details from your file with AI...",
+        "takesFewSeconds": "This takes just a few seconds.",
         "addNew": "Add New Apartment",
         "details": "Details",
         "createdAt": "Added on: ",

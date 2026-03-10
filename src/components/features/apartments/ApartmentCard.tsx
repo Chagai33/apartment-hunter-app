@@ -40,8 +40,13 @@ export function ApartmentCard({ apartment, preferences, checklistTemplates }: { 
         if (preferences.mustHaveBalcony && !apartment.balcony) missing.push(t('apartment.balcony'));
         if (preferences.mustHaveAC && !apartment.ac) missing.push(t('apartment.ac'));
 
-        const hasMamad = apartment.tama38 || apartment.notes?.includes('ממ"ד');
-        if (preferences.mustHaveMamad && !hasMamad) missing.push('ממ״ד');
+        if (preferences.acceptedShelters && preferences.acceptedShelters.length > 0) {
+            const hasAcceptedShelter = preferences.acceptedShelters.some(shelterType => {
+                if (shelterType === 'ממ״ד / תמ״א 38') return apartment.tama38 === true;
+                return apartment.inferredCustomChecks?.[shelterType] === true;
+            });
+            if (!hasAcceptedShelter) missing.push(t('apartment.shelter', 'מיגון'));
+        }
 
         if (preferences.mustHavePets && !apartment.pets) missing.push(t('apartment.pets'));
         if (preferences.mustHaveFurnished && !apartment.furnished) missing.push(t('apartment.furnished'));

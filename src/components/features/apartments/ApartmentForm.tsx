@@ -420,8 +420,8 @@ export function ApartmentForm() {
                         </svg>
                     </button>
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-blue-900 font-medium">Extracting details from your file with AI...</p>
-                    <p className="text-sm text-blue-600/70 mt-1">This takes just a few seconds.</p>
+                    <p className="text-blue-900 font-medium">{t('apartment.extractingDetails')}</p>
+                    <p className="text-sm text-blue-600/70 mt-1">{t('apartment.takesFewSeconds')}</p>
                 </div>
             )}
 
@@ -482,7 +482,7 @@ export function ApartmentForm() {
                                     </div>
                                 )}
                                 {isVisible('entranceDate') && (
-                                    <Input label={t('apartment.entranceDate', 'Entrance Date')} {...register('entranceDate')} placeholder="e.g. 1.8, מיידי..." />
+                                    <Input label={t('apartment.entranceDate', 'Entrance Date')} {...register('entranceDate')} placeholder={t('apartment.entranceDatePlaceholder', 'e.g. 1.8, Immediate...')} />
                                 )}
                             </div>
                             <div className="grid grid-cols-1 gap-4">
@@ -496,7 +496,7 @@ export function ApartmentForm() {
                     {/* --- Group 5: Contact Information (Moved up for Essential view) --- */}
                     {isGroupVisible([{ name: 'ownerName' }, { name: 'ownerPhone' }, { name: 'additionalContactName' }, { name: 'additionalPhone' }]) && (
                         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                            <h3 className="font-bold text-gray-800 border-b pb-2 mb-4">{t('apartment.details', 'Contact Details')}</h3>
+                            <h3 className="font-bold text-gray-800 border-b pb-2 mb-4">{t('apartment.groups.contactDetails', 'Contact Details')}</h3>
 
                             {/* Owner */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

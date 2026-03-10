@@ -64,8 +64,28 @@ export function ApartmentList() {
         if (prefs.mustHaveBalcony && !apartment.balcony) return false;
         if (prefs.mustHaveAC && !apartment.ac) return false;
 
-        const hasMamad = apartment.tama38 || apartment.notes?.includes('ממ"ד');
-        if (prefs.mustHaveMamad && !hasMamad) return false;
+        // --- Shelter Check (Tag-based) ---
+        if (prefs.acceptedShelters && prefs.acceptedShelters.length > 0) {
+            let hasAcceptedShelter = false;
+
+            // 1. Check standard mamad field mapped by AI (if 'ממ״ד / תמ״א 38' is acceptable)
+            if (apartment.tama38 && prefs.acceptedShelters.includes('ממ״ד / תמ״א 38')) {
+                hasAcceptedShelter = true;
+            }
+
+            // 2. Check inferred custom checks
+            if (!hasAcceptedShelter && apartment.inferredCustomChecks) {
+                for (const shelterTag of prefs.acceptedShelters) {
+                    // Match verbatim what AI extracts
+                    if (apartment.inferredCustomChecks[shelterTag]) {
+                        hasAcceptedShelter = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasAcceptedShelter) return false;
+        }
 
         if (prefs.mustHavePets && !apartment.pets) return false;
         if (prefs.mustHaveFurnished && !apartment.furnished) return false;

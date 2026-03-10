@@ -358,8 +358,13 @@ export function ApartmentDetails() {
         if (preferences.mustHaveBalcony && !apartment.balcony) missing.push(t('apartment.balcony'));
         if (preferences.mustHaveAC && !apartment.ac) missing.push(t('apartment.ac'));
 
-        const hasMamad = apartment.tama38 || apartment.notes?.includes('ממ"ד');
-        if (preferences.mustHaveMamad && !hasMamad) missing.push('ממ״ד');
+        if (preferences.acceptedShelters && preferences.acceptedShelters.length > 0) {
+            const hasAcceptedShelter = preferences.acceptedShelters.some(shelterType => {
+                if (shelterType === 'ממ״ד / תמ״א 38') return apartment.tama38 === true;
+                return apartment.inferredCustomChecks?.[shelterType] === true;
+            });
+            if (!hasAcceptedShelter) missing.push(t('apartment.shelter', 'מיגון'));
+        }
 
         if (preferences.mustHavePets && !apartment.pets) missing.push(t('apartment.pets'));
         if (preferences.mustHaveFurnished && !apartment.furnished) missing.push(t('apartment.furnished'));
@@ -602,13 +607,7 @@ export function ApartmentDetails() {
                             </div>
                             <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveBalcony || false} onChange={() => toggle('mustHaveBalcony')} />
                         </label>
-                        <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-                            <span className="font-medium text-gray-700">ממ״ד / תמ״א</span>
-                            <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveMamad ? "bg-blue-600" : "bg-gray-200")}>
-                                <div className={clsx("w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200", tempPrefs.mustHaveMamad ? "translate-x-[-1.25rem]" : "translate-x-0")} />
-                            </div>
-                            <input type="checkbox" className="hidden" checked={tempPrefs.mustHaveMamad || false} onChange={() => toggle('mustHaveMamad')} />
-                        </label>
+
                         <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
                             <span className="font-medium text-gray-700">{t('apartment.ac')}</span>
                             <div className={clsx("w-12 h-7 rounded-full p-1 transition-colors duration-200", tempPrefs.mustHaveAC ? "bg-blue-600" : "bg-gray-200")}>

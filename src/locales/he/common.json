@@ -1,5 +1,10 @@
 {
     "common": {
+        "yes": "כן",
+        "no": "לא",
+        "remove": "הסר",
+        "selectGroup": "בחר קבוצה",
+        "selectGroupPlaceholder": "-- בחר קבוצה --",
         "loading": "טוען...",
         "error": "אירעה שגיאה",
         "save": "שמור",
@@ -110,6 +115,7 @@
         "copyright": "© 2026 Apartment Hunter. נבנה ע״י חגי יחיאל."
     },
     "settings": {
+        "addRequirementFromBank": "הוסף מאפיין מהמאגר או צור חדש",
         "title": "הגדרות חיפוש",
         "subtitle": "הגדר מה חייב להיות בדירה כדי שנדע להתריע לך",
         "saveSuccess": "ההגדרות נשמרו בהצלחה",
@@ -231,6 +237,28 @@
         "personalWorkspace": "המרחב האישי שלי"
     },
     "apartment": {
+        "groups": {
+            "basicSpecs": "מפרט בסיסי",
+            "financials": "פיננסים",
+            "building": "בניין וסביבה",
+            "features": "מאפייני דירה",
+            "contactDetails": "פרטי קשר"
+        },
+        "floor": "קומה",
+        "size": "גודל (מ״ר)",
+        "entranceDate": "תאריך כניסה",
+        "entranceDatePlaceholder": "למשל 1.8, מיידי...",
+        "showAllDetails": "הצג את כל שאר הפרטים (אופציונלי)",
+        "vaad": "ועד בית (₪)",
+        "frontFacing": "חזית",
+        "rearFacing": "עורפית",
+        "renovated": "משופצת",
+        "customFeaturesTitle": "מאפיינים נוספים",
+        "notesPlaceholder": "פרטים נוספים...",
+        "sourceText": "נתוני מקור (פלט מהמודעה)",
+        "sourceDisclaimer": "זהו הטקסט או התמונה המקורית ששימשה למילוי הטופס. תוכלו לאמת כאן את הנתונים.",
+        "extractingDetails": "מחלץ נתונים מהקובץ בעזרת בינה מלאכותית...",
+        "takesFewSeconds": "זה ייקח רק כמה שניות.",
         "addNew": "הוסף דירה חדשה",
         "details": "פרטים",
         "createdAt": "נוסף בתאריך: ",

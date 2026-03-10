@@ -20,7 +20,7 @@ export interface UserPreferences {
     mustHaveBalcony?: boolean;
     mustHavePets?: boolean;
     mustHaveAC?: boolean;
-    mustHaveMamad?: boolean; // Safe room
+    acceptedShelters?: string[]; // e.g. ["ממ״ד / תמ״א 38", "ממ״ק", "מקלט בבניין"]
     mustHaveTama38?: boolean;
     mustHaveFurnished?: boolean;
 
@@ -117,6 +117,7 @@ export interface Apartment {
     notes?: string;
     checklistNotes?: Record<string, string>; // key: fieldName, value: note
     customChecks?: Record<string, boolean>; // key: templateId, value: checked
+    inferredCustomChecks?: Record<string, boolean>; // key: string label exactly as parsed by AI, value: checked
 
     // Phases State (optional, can be derived)
     phase?: 'scouting' | 'phone' | 'visit' | 'signing';
