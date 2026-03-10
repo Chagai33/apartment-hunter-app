@@ -95,6 +95,16 @@ export function useApartments() {
         }
     }, [user, activeGroupId, groups]);
 
+    const sanitizeData = (data: any) => {
+        const sanitized = { ...data };
+        Object.keys(sanitized).forEach(key => {
+            if (sanitized[key] === undefined) {
+                delete sanitized[key];
+            }
+        });
+        return sanitized;
+    };
+
     const addApartment = async (apartmentData: Omit<Apartment, 'id'>, targetGroupId?: string) => {
         if (!user) throw new Error("User must be logged in to add an apartment");
 
@@ -105,8 +115,9 @@ export function useApartments() {
         }
 
         try {
+            const cleanData = sanitizeData(apartmentData);
             await addDoc(collection(db, 'apartments'), {
-                ...apartmentData,
+                ...cleanData,
                 groupId: effectiveGroupId,
                 userId: user.uid, // Owner/Original uploader
                 createdBy: user.uid, // Creator for audit
@@ -130,8 +141,9 @@ export function useApartments() {
 
     const updateApartment = async (apartmentId: string, updates: Partial<Apartment>) => {
         try {
+            const cleanUpdates = sanitizeData(updates);
             await updateDoc(doc(db, 'apartments', apartmentId), {
-                ...updates,
+                ...cleanUpdates,
                 updatedAt: Date.now()
             });
         } catch (err) {

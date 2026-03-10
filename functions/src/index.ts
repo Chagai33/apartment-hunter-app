@@ -70,8 +70,11 @@ Specific Extraction Rules:
 3. Rooms and Floor: 
    - "סטודיו" or "דירת סטודיו" -> \`rooms: 1\`. "X חדרים" -> \`rooms: X\`.
    - "קומת קרקע" -> \`floor: 0\`. "קומה X" -> \`floor: X\`.
-4. Prices and Costs: "שכירות כולל הכל" / "חשבשות כלולים" -> Add this exact phrase to the \`notes\`! "ועד בית" -> extract monthly cost. "ארנונה" -> extract bi-monthly cost.
-5. Dates: "כניסה" -> extract condition (e.g., "מיידי", "1.4", "גמיש", "תאריך קרוב") into \`entranceDate\`.
+4. Prices and Costs: 
+   - "שכירות כולל הכל" / "חשבשות כלולים" -> Add this exact phrase to the \`notes\`! 
+   - "ועד בית" -> extract monthly cost. 
+   - "ארנונה" -> extract bi-monthly cost. CRITICAL: Do NOT confuse dates (e.g. "1.4", "1.8") with the Arnona cost! If the text says "כולל ארנונה" or "ארנונה כלול", set \`arnona\` to 0.
+5. Dates: "כניסה" -> extract condition or date (e.g., "מיידי", "1.8", "גמיש", "תאריך קרוב") into \`entranceDate\`. WARNING: Extract the EXACT date from the text (e.g., "1.4" if it says "כניסה ב1.4"). Do NOT blindly pick examples from this prompt.
 6. Direction: "עורפית" -> \`rearFacing: true\`. "חזית" -> \`frontFacing: true\`.
 7. Core Features: "מזגן" -> \`ac: true\`, "מרפסת" -> \`balcony: true\`, "חניה" -> \`parking: true\`, "מותר בעלי חיים" / "בע"ח" / "כלב" / "חתול" -> \`pets: true\`, "מעלית" -> \`elevator: true\`, "מרוהט" -> \`furnished: true\`. 
    "ממד" -> \`tama38: true\`. DO NOT map "מקלט" or "ממ"ק" to tama38 (see rule 9).
@@ -113,30 +116,31 @@ Specific Extraction Rules:
                     responseSchema: {
                         type: "OBJECT",
                         properties: {
-                            address: { type: "STRING", nullable: true },
-                            neighborhood: { type: "STRING", nullable: true },
-                            price: { type: "NUMBER", nullable: true },
-                            rooms: { type: "NUMBER", nullable: true },
-                            floor: { type: "NUMBER", nullable: true },
-                            size: { type: "NUMBER", nullable: true },
-                            elevator: { type: "BOOLEAN", nullable: true },
-                            parking: { type: "BOOLEAN", nullable: true },
-                            balcony: { type: "BOOLEAN", nullable: true },
-                            ac: { type: "BOOLEAN", nullable: true },
-                            tama38: { type: "BOOLEAN", nullable: true },
-                            pets: { type: "BOOLEAN", nullable: true },
-                            furnished: { type: "BOOLEAN", nullable: true },
-                            rearFacing: { type: "BOOLEAN", nullable: true },
-                            frontFacing: { type: "BOOLEAN", nullable: true },
-                            brokerFee: { type: "BOOLEAN", nullable: true },
-                            vaad: { type: "NUMBER", nullable: true },
-                            arnona: { type: "NUMBER", nullable: true },
-                            entranceDate: { type: "STRING", nullable: true },
-                            notes: { type: "STRING", nullable: true },
-                            ownerName: { type: "STRING", nullable: true },
-                            ownerPhone: { type: "STRING", nullable: true },
+                            address: { type: "STRING", description: "The street address of the apartment. Extract city if possible.", nullable: true },
+                            neighborhood: { type: "STRING", description: "The neighborhood the apartment is in.", nullable: true },
+                            price: { type: "NUMBER", description: "The monthly rent price in ILS.", nullable: true },
+                            rooms: { type: "NUMBER", description: "The number of rooms. (e.g. 3, 3.5). If 'סטודיו' (Studio), MUST be 1.", nullable: true },
+                            floor: { type: "NUMBER", description: "The floor number the apartment is on (e.g. 3). If ground floor, set to 0.", nullable: true },
+                            size: { type: "NUMBER", description: "The size of the apartment in square meters (מ\"ר).", nullable: true },
+                            elevator: { type: "BOOLEAN", description: "True if the building has an elevator.", nullable: true },
+                            parking: { type: "BOOLEAN", description: "True if the apartment includes parking.", nullable: true },
+                            balcony: { type: "BOOLEAN", description: "True if the apartment has a balcony/sun terrace (מרפסת שמש).", nullable: true },
+                            ac: { type: "BOOLEAN", description: "True if the apartment has air conditioning (מזגן).", nullable: true },
+                            tama38: { type: "BOOLEAN", description: "True ONLY if the apartment explicitly says Mamad (ממ\"ד). FALSE or omit if it says Miklat (מקלט) or Mamak (ממ\"ק).", nullable: true },
+                            pets: { type: "BOOLEAN", description: "True if pets are allowed.", nullable: true },
+                            furnished: { type: "BOOLEAN", description: "True if the apartment is furnished (מרוהטת) or partially furnished.", nullable: true },
+                            rearFacing: { type: "BOOLEAN", description: "True if the apartment is rear-facing (עורפית).", nullable: true },
+                            frontFacing: { type: "BOOLEAN", description: "True if the apartment is front-facing (חזית).", nullable: true },
+                            brokerFee: { type: "BOOLEAN", description: "True if there IS a broker fee. If the text says 'ללא תיווך' (no broker), set this to FALSE.", nullable: true },
+                            vaad: { type: "NUMBER", description: "The monthly HOA/Vaad Bait cost in ILS (ועד בית).", nullable: true },
+                            arnona: { type: "NUMBER", description: "The bi-monthly property tax / Arnona cost in ILS (ארנונה). DO NOT CONFUSE DATES (e.g. 1.4) WITH ARNONA.", nullable: true },
+                            entranceDate: { type: "STRING", description: "The date or condition of entry (e.g., '1.4', '1.8', 'מיידי', 'גמיש'). EXTRACT EXACTLY FROM TEXT.", nullable: true },
+                            notes: { type: "STRING", description: "Crucial: Put ALL extra details here. This includes furniture for sale, condition of the apartment, viewing days/times, and everything else not strictly mapped.", nullable: true },
+                            ownerName: { type: "STRING", description: "The name of the person publishing the ad (landlord, current tenant, or agent).", nullable: true },
+                            ownerPhone: { type: "STRING", description: "The phone number to contact. Usually 10 digits starting with 05. Extract only the digits.", nullable: true },
                             inferredCustomChecks: {
                                 type: "OBJECT",
+                                description: "A map of other inferred boolean features. Keys MUST be the EXACT Hebrew phrases found in text, e.g. 'מקלט בבניין': true, 'חצר': true. Do NOT translate to English.",
                                 nullable: true
                             }
                         },

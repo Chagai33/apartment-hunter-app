@@ -206,6 +206,11 @@ export function ApartmentForm() {
         return () => unsub();
     }, [watchGroupId, user]);
 
+    const onFormError = (errors: any) => {
+        console.error("Form validation errors:", errors);
+        toast.error(t('apartment.validationRequired', 'נא למלא את כל שדות החובה או לתקן את השגיאות בטופס'));
+    };
+
     const onSubmit = async (data: any) => {
         if (!user) return;
         setSubmitting(true);
@@ -259,9 +264,11 @@ export function ApartmentForm() {
                 navigate('/dashboard');
             }, 500);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error(t('common.error'));
+            // Provide a clear error to the user rather than a generic one
+            const errorMessage = error?.message || t('common.error', 'אירעה שגיאה');
+            toast.error(`${t('common.errorDetails', 'שגיאה:')} ${errorMessage}`);
         } finally {
             setSubmitting(false);
         }
@@ -425,7 +432,7 @@ export function ApartmentForm() {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className={clsx("space-y-4 transition-opacity duration-300", isExtracting && "opacity-20 pointer-events-none")}>
+            <form onSubmit={handleSubmit(onSubmit, onFormError)} className={clsx("space-y-4 transition-opacity duration-300", isExtracting && "opacity-20 pointer-events-none")}>
 
                 {!activeGroupId && !id && (
                     <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 mb-4">
