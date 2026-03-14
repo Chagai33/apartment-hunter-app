@@ -7,7 +7,7 @@ import { getGeminiSystemPrompt } from './prompts';
 admin.initializeApp();
 const db = admin.firestore();
 
-const AI_MODEL = "gemini-2.5-flash-lite"; // Faster and cheaper for structured extraction
+const AI_MODEL = "gemini-2.5-pro"; // Powerful and accurate for precise structured extraction
 
 const DAILY_LIMIT = 20;
 
@@ -77,24 +77,49 @@ export const analyzeApartmentData = onCall(
             });
         }
 
-        // 3. Call Gemini API
+        // 3. Call Gemini API (with fallback mechanism)
         try {
-            const response = await ai.models.generateContent({
-                model: AI_MODEL,
-                contents: promptParams,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: geminiResponseSchema
-                }
-            });
+            let rawResponseText: string | undefined = undefined;
+            let finalModelUsed = AI_MODEL;
 
-            const rawResponseText = response.text;
-            if (!rawResponseText) {
-                throw new Error("No text returned from Gemini");
+            try {
+                const response = await ai.models.generateContent({
+                    model: AI_MODEL,
+                    contents: promptParams,
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: geminiResponseSchema
+                    }
+                });
+                rawResponseText = response.text;
+            } catch (error: any) {
+                console.warn(`Primary model ${AI_MODEL} failed, falling back. Error:`, error?.message || error);
+                
+                const FALLBACK_MODEL = "gemini-1.5-pro"; // Reliable fallback
+                finalModelUsed = FALLBACK_MODEL;
+                console.log(`Executing fallback with model: ${FALLBACK_MODEL}`);
+                
+                const fallbackResponse = await ai.models.generateContent({
+                    model: FALLBACK_MODEL,
+                    contents: promptParams,
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: geminiResponseSchema
+                    }
+                });
+                rawResponseText = fallbackResponse.text;
             }
+
+            if (!rawResponseText) {
+                throw new Error(`No text returned from Gemini (using model ${finalModelUsed})`);
+            }
+            
+            console.log("RAW GEMINI RESPONSE TEXT:", rawResponseText);
 
             // Parse response and ideally validate with our Zod schema
             const parsedJson = JSON.parse(rawResponseText);
+            console.log("PARSED JSON DATA:", JSON.stringify(parsedJson, null, 2));
+            
             const validatedData = apartmentSchema.parse(parsedJson);
 
             // Note: The transaction above already updated the limit, we don't need to do it here again.

@@ -170,8 +170,8 @@ export function ApartmentForm() {
 
     const hasValue = (name: string, isCheckbox = false) => {
         const val = formValues[name as keyof typeof formValues];
-        if (isCheckbox) return !!val;
-        if (typeof val === 'number') return val > 0;
+        if (isCheckbox) return val === true || val === false;
+        if (typeof val === 'number') return !isNaN(val);
         if (typeof val === 'string') return val.trim().length > 0;
         return val !== null && val !== undefined && val !== '';
     };
@@ -331,34 +331,62 @@ export function ApartmentForm() {
         );
     }
 
-    const handleExtractSuccess = (data: any, originalSource: string) => {
+    const handleExtractSuccess = async (data: any, originalSource: string) => {
+        console.log("DATA RECEIVED FROM AI:", data);
+        
         // Find custom checks matching the inferred ones
         let newCustomChecks = { ...customChecks };
+        let updatedTemplates = [...checklistTemplates];
+        let hasNewTemplates = false;
+        
+        const extractedFeatures = Array.isArray(data.inferredCustomFeatures) 
+            ? data.inferredCustomFeatures 
+            : Object.keys(data.inferredCustomChecks || {}).filter(k => data.inferredCustomChecks[k]);
 
-        if (data.inferredCustomChecks) {
-            Object.entries(data.inferredCustomChecks).forEach(([key, value]) => {
-                if (value) {
-                    // Try to find a matching existing template by label (case insensitive approach or similar logic)
-                    // Or we just add it to custom checks if an ID matches
-                    // Since Gemini returns raw strings, we might need a mapping or we create new templates here
-                    // For simplicity, if we don't have a template we just ignore for now in the UI logic or create one.
-                    // For this demo, let's look for templates that include the key in their label (naive match)
+        const extractedCustomChecksMap: Record<string, boolean> = {};
 
-                    const matchedTemplate = checklistTemplates.find(ct =>
-                        ct.label.toLowerCase().includes(key.toLowerCase()) ||
-                        key.toLowerCase().includes(ct.label.toLowerCase())
-                    );
+        extractedFeatures.forEach((key: string) => {
+            if (typeof key !== 'string') return;
+            extractedCustomChecksMap[key] = true;
 
-                    if (matchedTemplate) {
-                        newCustomChecks[matchedTemplate.id] = true;
-                    }
-                }
-            });
+            const matchedTemplate = updatedTemplates.find(ct =>
+                ct.label.toLowerCase().includes(key.toLowerCase()) ||
+                key.toLowerCase().includes(ct.label.toLowerCase())
+            );
+
+            if (matchedTemplate) {
+                newCustomChecks[matchedTemplate.id] = true;
+            } else if (user) {
+                // Create new template for unmatched extracted feature
+                const newId = Date.now().toString() + Math.random().toString(36).substring(2, 7);
+                const newTemplate: CustomChecklistTemplate = {
+                    id: newId,
+                    label: key,
+                    phase: 'phone'
+                };
+                updatedTemplates.push(newTemplate);
+                newCustomChecks[newId] = true;
+                hasNewTemplates = true;
+            }
+        });
+
+        if (hasNewTemplates && user) {
+            try {
+                const targetRef = watchGroupId
+                    ? doc(db, 'groups', watchGroupId)
+                    : doc(db, 'users', user.uid);
+                await updateDoc(targetRef, {
+                    checklistTemplates: updatedTemplates
+                });
+            } catch (err) {
+                console.error("Error saving new extracted templates:", err);
+            }
         }
 
         setCustomChecks(newCustomChecks);
 
         const currentValues = getValues();
+        const mergedInferredCustomChecks = { ...(currentValues.inferredCustomChecks || {}), ...extractedCustomChecksMap };
 
         // Populate Form
         reset({
@@ -386,7 +414,7 @@ export function ApartmentForm() {
             notes: data.notes || currentValues.notes,
             ownerName: data.ownerName || currentValues.ownerName,
             ownerPhone: data.ownerPhone || currentValues.ownerPhone,
-            inferredCustomChecks: data.inferredCustomChecks || currentValues.inferredCustomChecks || {},
+            inferredCustomChecks: mergedInferredCustomChecks,
         });
 
         if (data.ownerName || data.ownerPhone) {
@@ -690,32 +718,33 @@ export function ApartmentForm() {
                     )}
                 </div>
 
+                    {/* Active Custom Features (Extracted by AI or added manually) - moved out of details view so they are always visible if active */}
+                    {Object.keys(customChecks).filter(id => customChecks[id]).length > 0 && (
+                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                            <h3 className="font-bold text-gray-800 border-b pb-2 mb-4">{t('apartment.customFeaturesTitle', 'Additional Features')}</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {checklistTemplates
+                                    .filter(template => customChecks[template.id])
+                                    .map(template => (
+                                        <div key={template.id} className="inline-flex items-center space-x-2 space-x-reverse bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-100">
+                                            <span>{template.label}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setCustomChecks(prev => ({ ...prev, [template.id]: false }))}
+                                                className="text-blue-400 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
+                                                title={t('common.remove', 'הסר')}
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
+
                 {/* The rest is also only visible in details step */}
                 {formStep === 'details' && (
                     <>
-                        {/* Active Custom Features (Extracted by AI or added manually) */}
-                        {Object.keys(customChecks).filter(id => customChecks[id]).length > 0 && (
-                            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mt-6">
-                                <h3 className="font-bold text-gray-800 border-b pb-2 mb-4">{t('apartment.customFeaturesTitle', 'Additional Features')}</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {checklistTemplates
-                                        .filter(template => customChecks[template.id])
-                                        .map(template => (
-                                            <div key={template.id} className="inline-flex items-center space-x-2 space-x-reverse bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-100">
-                                                <span>{template.label}</span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCustomChecks(prev => ({ ...prev, [template.id]: false }))}
-                                                    className="text-blue-400 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
-                                                    title={t('common.remove', 'הסר')}
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                                </button>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
-                        )}
 
                         {/* Add Custom Feature */}
                         <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-4 space-y-3">

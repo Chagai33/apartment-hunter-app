@@ -38,9 +38,10 @@ const https_1 = require("firebase-functions/v2/https");
 const admin = __importStar(require("firebase-admin"));
 const genai_1 = require("@google/genai");
 const schema_1 = require("./schema");
+const prompts_1 = require("./prompts");
 admin.initializeApp();
 const db = admin.firestore();
-const AI_MODEL = "gemini-2.5-flash-lite"; // Faster and cheaper for structured extraction
+const AI_MODEL = "gemini-2.5-pro"; // Powerful and accurate for precise structured extraction
 const DAILY_LIMIT = 20;
 exports.analyzeApartmentData = (0, https_1.onCall)({
     secrets: ["GEMINI_API_KEY"],
@@ -81,35 +82,7 @@ exports.analyzeApartmentData = (0, https_1.onCall)({
     });
     // 2. Prepare Gemini Prompt
     const promptParams = [];
-    let promptText = `
-You are an expert Israeli real estate assistant. Extract apartment details extremely accurately from the provided Hebrew content.
-STRICT ANTI-HALLUCINATION RULES:
-- ONLY extract information explicitly stated in the text. NEVER infer, guess, or assume features.
-- If a boolean feature is NOT mentioned, you MUST OMIT IT entirely (leave it undefined/null). Do not set to true or false unless explicit.
-
-Specific Extraction Rules:
-1. Broker Fee: "ללא תיווך" / "ללא עמלת תיווך" (even with punctuation like "ללא תיווך !") MUST map strictly to \`brokerFee: false\`. If an agent is posting, or it says "תיווך", map to \`brokerFee: true\`.
-2. Address & Neighborhood: Strongly attempt to extract the neighborhood into \`neighborhood\` (e.g. "שכונת תל חיים" -> "תל חיים").
-3. Rooms and Floor: 
-   - "סטודיו" or "דירת סטודיו" -> \`rooms: 1\`. "X חדרים" -> \`rooms: X\`.
-   - "קומת קרקע" -> \`floor: 0\`. "קומה X" -> \`floor: X\`.
-4. Prices and Costs: 
-   - "שכירות כולל הכל" / "חשבשות כלולים" -> Add this exact phrase to the \`notes\`! 
-   - "ועד בית" -> extract monthly cost. 
-   - "ארנונה" -> extract bi-monthly cost. CRITICAL: Do NOT confuse dates (e.g. "1.4", "1.8") with the Arnona cost! If the text says "כולל ארנונה" or "ארנונה כלול", set \`arnona\` to 0.
-5. Dates: "כניסה" -> extract condition or date (e.g., "מיידי", "1.8", "גמיש", "תאריך קרוב") into \`entranceDate\`. WARNING: Extract the EXACT date from the text (e.g., "1.4" if it says "כניסה ב1.4"). Do NOT blindly pick examples from this prompt.
-6. Direction: "עורפית" -> \`rearFacing: true\`. "חזית" -> \`frontFacing: true\`.
-7. Core Features: "מזגן" -> \`ac: true\`, "מרפסת" -> \`balcony: true\`, "חניה" -> \`parking: true\`, "מותר בעלי חיים" / "בע"ח" / "כלב" / "חתול" -> \`pets: true\`, "מעלית" -> \`elevator: true\`, "מרוהט" -> \`furnished: true\`. 
-   "ממד" -> \`tama38: true\`. DO NOT map "מקלט" or "ממ"ק" to tama38 (see rule 9).
-8. Phone Numbers: Extract ONLY digits for \`ownerPhone\` (e.g., "0524825881"). Ignore spaces/dashes.
-9. CATCH-ALL RECORD (CRITICAL - EXACT PHRASING):
-   Any other feature ("מקלט בבניין", "ממ"ק", "חצר", "קודן בכניסה", "מרפסת גג", "סורגים", etc.) MUST be extracted EXACTLY AS IT IS WRITTEN in the text and placed into \`inferredCustomChecks\` as a \`true\` boolean.
-   For example, if the text says "מקלט בבניין", you must include \`{"מקלט בבניין": true}\` in \`inferredCustomChecks\`. Do NOT translate or generalize it to English. Write the EXACT Hebrew phrase the AI recognized.
-   Other conditions (furniture for sale, viewing times, sublet) go into \`notes\`.
-`;
-    if (data.customCheckLabels && data.customCheckLabels.length > 0) {
-        promptText += `\n\nAlso check if the following features are present (return in 'inferredCustomChecks'): ${data.customCheckLabels.join(', ')}. Only include them if explicitly mentioned or strongly implied.`;
-    }
+    let promptText = (0, prompts_1.getGeminiSystemPrompt)(data.customCheckLabels);
     if (data.text) {
         promptText += `\n\nText Content:\n${data.text}`;
     }
@@ -124,55 +97,43 @@ Specific Extraction Rules:
             }
         });
     }
-    // 3. Call Gemini API
+    // 3. Call Gemini API (with fallback mechanism)
     try {
-        const response = await ai.models.generateContent({
-            model: AI_MODEL,
-            contents: promptParams,
-            config: {
-                responseMimeType: "application/json",
-                // Use zod to generate the JSON schema for Gemini
-                responseSchema: {
-                    type: "OBJECT",
-                    properties: {
-                        address: { type: "STRING", description: "The street address of the apartment. Extract city if possible.", nullable: true },
-                        neighborhood: { type: "STRING", description: "The neighborhood the apartment is in.", nullable: true },
-                        price: { type: "NUMBER", description: "The monthly rent price in ILS.", nullable: true },
-                        rooms: { type: "NUMBER", description: "The number of rooms. (e.g. 3, 3.5). If 'סטודיו' (Studio), MUST be 1.", nullable: true },
-                        floor: { type: "NUMBER", description: "The floor number the apartment is on (e.g. 3). If ground floor, set to 0.", nullable: true },
-                        size: { type: "NUMBER", description: "The size of the apartment in square meters (מ\"ר).", nullable: true },
-                        elevator: { type: "BOOLEAN", description: "True if the building has an elevator.", nullable: true },
-                        parking: { type: "BOOLEAN", description: "True if the apartment includes parking.", nullable: true },
-                        balcony: { type: "BOOLEAN", description: "True if the apartment has a balcony/sun terrace (מרפסת שמש).", nullable: true },
-                        ac: { type: "BOOLEAN", description: "True if the apartment has air conditioning (מזגן).", nullable: true },
-                        tama38: { type: "BOOLEAN", description: "True ONLY if the apartment explicitly says Mamad (ממ\"ד). FALSE or omit if it says Miklat (מקלט) or Mamak (ממ\"ק).", nullable: true },
-                        pets: { type: "BOOLEAN", description: "True if pets are allowed.", nullable: true },
-                        furnished: { type: "BOOLEAN", description: "True if the apartment is furnished (מרוהטת) or partially furnished.", nullable: true },
-                        rearFacing: { type: "BOOLEAN", description: "True if the apartment is rear-facing (עורפית).", nullable: true },
-                        frontFacing: { type: "BOOLEAN", description: "True if the apartment is front-facing (חזית).", nullable: true },
-                        brokerFee: { type: "BOOLEAN", description: "True if there IS a broker fee. If the text says 'ללא תיווך' (no broker), set this to FALSE.", nullable: true },
-                        vaad: { type: "NUMBER", description: "The monthly HOA/Vaad Bait cost in ILS (ועד בית).", nullable: true },
-                        arnona: { type: "NUMBER", description: "The bi-monthly property tax / Arnona cost in ILS (ארנונה). DO NOT CONFUSE DATES (e.g. 1.4) WITH ARNONA.", nullable: true },
-                        entranceDate: { type: "STRING", description: "The date or condition of entry (e.g., '1.4', '1.8', 'מיידי', 'גמיש'). EXTRACT EXACTLY FROM TEXT.", nullable: true },
-                        notes: { type: "STRING", description: "Crucial: Put ALL extra details here. This includes furniture for sale, condition of the apartment, viewing days/times, and everything else not strictly mapped.", nullable: true },
-                        ownerName: { type: "STRING", description: "The name of the person publishing the ad (landlord, current tenant, or agent).", nullable: true },
-                        ownerPhone: { type: "STRING", description: "The phone number to contact. Usually 10 digits starting with 05. Extract only the digits.", nullable: true },
-                        inferredCustomChecks: {
-                            type: "OBJECT",
-                            description: "A map of other inferred boolean features. Keys MUST be the EXACT Hebrew phrases found in text, e.g. 'מקלט בבניין': true, 'חצר': true. Do NOT translate to English.",
-                            nullable: true
-                        }
-                    },
-                    required: ["address", "price", "rooms"]
+        let rawResponseText = undefined;
+        let finalModelUsed = AI_MODEL;
+        try {
+            const response = await ai.models.generateContent({
+                model: AI_MODEL,
+                contents: promptParams,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema_1.geminiResponseSchema
                 }
-            }
-        });
-        const rawResponseText = response.text;
-        if (!rawResponseText) {
-            throw new Error("No text returned from Gemini");
+            });
+            rawResponseText = response.text;
         }
+        catch (error) {
+            console.warn(`Primary model ${AI_MODEL} failed, falling back. Error:`, error?.message || error);
+            const FALLBACK_MODEL = "gemini-1.5-pro"; // Reliable fallback
+            finalModelUsed = FALLBACK_MODEL;
+            console.log(`Executing fallback with model: ${FALLBACK_MODEL}`);
+            const fallbackResponse = await ai.models.generateContent({
+                model: FALLBACK_MODEL,
+                contents: promptParams,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema_1.geminiResponseSchema
+                }
+            });
+            rawResponseText = fallbackResponse.text;
+        }
+        if (!rawResponseText) {
+            throw new Error(`No text returned from Gemini (using model ${finalModelUsed})`);
+        }
+        console.log("RAW GEMINI RESPONSE TEXT:", rawResponseText);
         // Parse response and ideally validate with our Zod schema
         const parsedJson = JSON.parse(rawResponseText);
+        console.log("PARSED JSON DATA:", JSON.stringify(parsedJson, null, 2));
         const validatedData = schema_1.apartmentSchema.parse(parsedJson);
         // Note: The transaction above already updated the limit, we don't need to do it here again.
         return validatedData;
