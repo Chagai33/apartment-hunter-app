@@ -386,6 +386,7 @@ export function ApartmentForm() {
             notes: data.notes || currentValues.notes,
             ownerName: data.ownerName || currentValues.ownerName,
             ownerPhone: data.ownerPhone || currentValues.ownerPhone,
+            inferredCustomChecks: data.inferredCustomChecks || currentValues.inferredCustomChecks || {},
         });
 
         if (data.ownerName || data.ownerPhone) {
