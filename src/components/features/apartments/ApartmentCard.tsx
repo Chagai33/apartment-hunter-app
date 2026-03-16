@@ -92,6 +92,11 @@ export function ApartmentCard({ apartment, preferences, checklistTemplates }: { 
                     {thumbnail ? (
                         <div className="relative w-24 h-24 flex-shrink-0">
                             <img src={thumbnail} alt={apartment.address} className="w-full h-full object-cover rounded-md" />
+                            {apartment.images && apartment.images.length > 1 && (
+                                <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                                    1/{apartment.images.length}
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center flex-shrink-0 group-hover:bg-gray-200 transition-colors">

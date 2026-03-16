@@ -13,6 +13,7 @@ import { Input } from '../../common/Input';
 import { Apartment, CustomChecklistTemplate } from '../../../types';
 import { onSnapshot, updateDoc } from 'firebase/firestore';
 import { SmartImportDropzone } from './SmartImportDropzone';
+import { ImageUploader, ImageItem } from '../../common/ImageUploader';
 
 const BooleanToggle = ({ control, name, label, t }: { control: any, name: keyof Apartment, label: string, t: any }) => (
     <Controller
@@ -75,6 +76,9 @@ export function ApartmentForm() {
     const [checklistTemplates, setChecklistTemplates] = useState<CustomChecklistTemplate[]>([]);
     const [customFeatureInput, setCustomFeatureInput] = useState('');
 
+    // Images State
+    const [images, setImages] = useState<ImageItem[]>([]);
+
     // Smart Import State
     const [isExtracting, setIsExtracting] = useState(false);
     const [extractedMissingFields, setExtractedMissingFields] = useState<string[]>([]);
@@ -124,6 +128,14 @@ export function ApartmentForm() {
 
                     if (data.customChecks) {
                         setCustomChecks(data.customChecks);
+                    }
+                    
+                    if (data.images && Array.isArray(data.images)) {
+                        setImages(data.images.map(img => ({
+                            id: Math.random().toString(36).substring(2, 9),
+                            url: img.url,
+                            path: img.path
+                        })));
                     }
 
                     // Best Practice: Reset the form with the data.
@@ -178,7 +190,7 @@ export function ApartmentForm() {
 
     const isVisible = (name: string, isCheckbox = false) => {
         if (formStep === 'details') return true;
-        if (['address', 'price', 'rooms'].includes(name)) return true;
+        if (['address', 'price', 'rooms', 'images'].includes(name)) return true;
         return hasValue(name, isCheckbox);
     };
 
@@ -218,6 +230,7 @@ export function ApartmentForm() {
         const parsedData = {
             ...data,
             customChecks,
+            images,
             price: data.price ? Number(data.price) : 0,
             rooms: data.rooms ? Number(data.rooms) : 0,
             floor: data.floor ? Number(data.floor) : null,
@@ -714,6 +727,18 @@ export function ApartmentForm() {
                                     <BooleanToggle control={control} name="renovated" label={t('apartment.renovated', 'Renovated (משופצת)')} t={t} />
                                 )}
                             </div>
+                        </div>
+                    )}
+                    
+                    {/* --- Group 6: Media --- */}
+                    {isGroupVisible([{ name: 'images' }]) && (
+                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                            <h3 className="font-bold text-gray-800 border-b pb-2 mb-4">{t('apartment.groups.media', 'Images')}</h3>
+                            <ImageUploader 
+                                images={images}
+                                onChange={setImages}
+                                maxImages={10}
+                            />
                         </div>
                     )}
                 </div>

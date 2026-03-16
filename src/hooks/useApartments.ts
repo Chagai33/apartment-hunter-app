@@ -10,7 +10,8 @@ import {
     doc,
     orderBy
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import { useGroup } from '../context/GroupContext';
 import { Apartment } from '../types';
@@ -105,7 +106,35 @@ export function useApartments() {
         return sanitized;
     };
 
-    const addApartment = async (apartmentData: Omit<Apartment, 'id'>, targetGroupId?: string) => {
+    const uploadImages = async (images: any[], apartmentId: string, userId: string) => {
+        const uploadedImages: { url: string, path: string }[] = [];
+        
+        for (const img of images) {
+            if (img.file) {
+                const uuid = Math.random().toString(36).substring(2, 15);
+                const fileExtension = img.file.name ? img.file.name.split('.').pop() : 'jpg';
+                const imagePath = `apartments/${userId}/${apartmentId}/${uuid}.${fileExtension}`;
+                const storageRef = ref(storage, imagePath);
+                
+                await uploadBytes(storageRef, img.file);
+                const downloadUrl = await getDownloadURL(storageRef);
+                
+                uploadedImages.push({
+                    url: downloadUrl,
+                    path: imagePath
+                });
+            } else if (img.url && img.path) {
+                // Keep existing images
+                uploadedImages.push({
+                    url: img.url,
+                    path: img.path
+                });
+            }
+        }
+        return uploadedImages;
+    };
+
+    const addApartment = async (apartmentData: any, targetGroupId?: string) => {
         if (!user) throw new Error("User must be logged in to add an apartment");
 
         const effectiveGroupId = activeGroupId || targetGroupId;
@@ -115,23 +144,57 @@ export function useApartments() {
         }
 
         try {
+            // Extract raw images array before sanitization
+            const rawImages = apartmentData.images || [];
+            delete apartmentData.images;
+
             const cleanData = sanitizeData(apartmentData);
-            await addDoc(collection(db, 'apartments'), {
+            
+            // 1. Create the document first to get the ID
+            const docRef = await addDoc(collection(db, 'apartments'), {
                 ...cleanData,
                 groupId: effectiveGroupId,
                 userId: user.uid, // Owner/Original uploader
                 createdBy: user.uid, // Creator for audit
                 createdAt: Date.now(), // Using timestamp number
-                updatedAt: Date.now()
+                updatedAt: Date.now(),
+                images: [] // Temporary empty array
             });
+
+            // 2. Upload images with the new document ID
+            if (rawImages.length > 0) {
+                const uploadedImages = await uploadImages(rawImages, docRef.id, user.uid);
+                
+                // 3. Update the document with image URLs
+                await updateDoc(docRef, {
+                    images: uploadedImages,
+                    updatedAt: Date.now()
+                });
+            }
+            
+            return docRef.id;
         } catch (err) {
             console.error("Error adding apartment:", err);
             throw err;
         }
     };
 
-    const deleteApartment = async (apartmentId: string) => {
+    const deleteApartment = async (apartmentId: string, images?: { url: string, path: string }[]) => {
         try {
+            // Delete associated images from Storage
+            if (images && images.length > 0) {
+                for (const img of images) {
+                    if (img.path) {
+                        try {
+                            const imageRef = ref(storage, img.path);
+                            await deleteObject(imageRef);
+                        } catch (e) {
+                            console.error("Failed to delete image from storage:", e);
+                        }
+                    }
+                }
+            }
+            
             await deleteDoc(doc(db, 'apartments', apartmentId));
         } catch (err) {
             console.error("Error deleting apartment:", err);
@@ -139,8 +202,20 @@ export function useApartments() {
         }
     };
 
-    const updateApartment = async (apartmentId: string, updates: Partial<Apartment>) => {
+    const updateApartment = async (apartmentId: string, updates: any) => {
+        if (!user) throw new Error("User must be logged in to update an apartment");
+        
         try {
+            // Extract raw images array
+            const rawImages = updates.images;
+            if (rawImages !== undefined) {
+                delete updates.images;
+                
+                // Upload new images and keep existing ones
+                const uploadedImages = await uploadImages(rawImages, apartmentId, user.uid);
+                updates.images = uploadedImages;
+            }
+
             const cleanUpdates = sanitizeData(updates);
             await updateDoc(doc(db, 'apartments', apartmentId), {
                 ...cleanUpdates,

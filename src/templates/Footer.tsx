@@ -12,7 +12,7 @@ export function Footer() {
                     <div className="flex items-center gap-2 text-gray-500">
                         <Shield size={14} />
                         <span className="text-xs">
-                            {t('footer.developedBy')} <a href="https://portfolio-h.com" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-blue-600 transition-colors">{t('footer.developerName')}</a>
+                            {t('footer.developedBy')} <a href="https://www.linkedin.com/in/chagai-yechiel/" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-blue-600 transition-colors">{t('footer.developerName')}</a>
                         </span>
                     </div>
 

@@ -679,6 +679,26 @@ export function ApartmentDetails() {
 
     return (
         <div className="pb-20">
+            {/* Image Gallery */}
+            {apartment.images && apartment.images.length > 0 && (
+                <div className="w-full h-64 bg-gray-100 relative">
+                    {apartment.images.length === 1 ? (
+                        <img src={apartment.images[0].url} alt={apartment.address} className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="flex overflow-x-auto snap-x snap-mandatory h-full hide-scrollbar">
+                            {apartment.images.map((img, index) => (
+                                <div key={img.path || index} className="w-full h-full flex-shrink-0 snap-center relative">
+                                    <img src={img.url} alt={`${apartment.address} - ${index + 1}`} className="w-full h-full object-cover" />
+                                    <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full font-medium shadow-sm backdrop-blur-sm">
+                                        {index + 1} / {apartment.images?.length}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Header / Hero */}
             <div className="bg-white p-4 border-b">
                 <div className="flex justify-between items-start mb-2">
